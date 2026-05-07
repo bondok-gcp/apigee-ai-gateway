@@ -25,15 +25,89 @@ To provision Apigee with [Terraform](url) in your project:
 
 ```sh
 BILLING_ID=YOUR_BILLING_ID
-cd tf
+cd ./tf/provision
 terraform init
 terraform apply -var "project_id=$GOOGLE_CLOUD_PROJECT" -var "billing_id=$BILLING_ID" \
 --var-file=variables.tfvars
+cd ../..
 ```
 
 To provision with the wizard in the Google Cloud console:
 
 ![Apigee provisioning wizard](https://raw.githubusercontent.com/tyayers/public-files/refs/heads/main/apigee/apigee-aigw-provision.png)
 
-## Step 3: Deploy AI model proxies
-A **proxy** in Apigee transfers, secures & mediates any type of network API traffic, so to start we're going to secure our **AI model** access.
+## Step 3: Create and deploy AI model proxies
+A **proxy** in Apigee transfers, secures & mediates any type of network API traffic, so to start we're going to secure the **AI model** access.
+
+There are a many ways to create and deploy proxies in Apigee. In this lab, we are going to demonstrate 2 ways, using **Proxy Templates** and **Terraform** deployments.
+
+Let's first get the environment information from our Apigee org using the [apigeecli](https://github.com/apigee/apigeecli) command-line tool.
+
+```sh
+# install apigeecli
+curl -L https://raw.githubusercontent.com/apigee/apigeecli/main/downloadLatest.sh | sh -
+
+APIGEE_ENVIRONMENT=$(apigeecli environments list -o $PROJECT_ID --default-token | jq --raw-output '.[0]')
+echo $APIGEE_ENVIRONMENT
+APIGEE_HOST=$(apigeecli envgroups list -o $PROJECT_ID --default-token | jq --raw-output '.environmentGroups[0].hostnames[-1]')
+echo $APIGEE_HOST
+```
+
+Now let's create an AI proxy in Apigee for Gemini from a YAML template.
+
+```sh
+# install apigee feature templater (aft) globally
+npm i apigee-templater -g
+
+# deploy the AI-Gemini template to our Apigee org
+aft -i ./templates/AI-Gemini.yaml -o $GOOGLE_CLOUD_PROJECT:$APIGEE_ENVIRONMENT
+```
+
+Add authn/authz, cors, model armor security, pii masking, and some other features.
+
+```sh
+aft -i ./templates/AI-Gemini.yaml -a ./features/AI-Auth.yaml
+aft -i ./templates/AI-Gemini.yaml -a ./features/AI-Security.yaml
+aft -i ./templates/AI-Gemini.yaml -a ./features/AI-Caching.yaml
+aft -i ./templates/AI-Gemini.yaml -a ./features/AI-PII-Masking.yaml
+aft -i ./templates/AI-Gemini.yaml -a ./features/CORS.yaml
+# deploy again
+aft -i ./templates/AI-Gemini.yaml -o $GOOGLE_CLOUD_PROJECT:$APIGEE_ENVIRONMENT
+```
+
+We can also convert the YAML to a native Apigee bundle, and apply it to our org using Terraform.
+
+```sh
+aft -i ./templates/AI-Gemini.yaml -o ./AI-Gemini.zip
+cd ./tf/proxies
+terraform init
+terraform apply
+cd ../..
+```
+
+TODO
+- test proxy with auth, product, security, etc...
+
+## Step 4: Use AI model proxy in Gemini CLI and Claude Code
+
+TODO
+* Configure gemini cli to use Apigee proxy
+* Make some calls, view analytics in Apigee console
+* View analytics in AI Portal
+
+## Step 5: Create and deploy AI tool proxies
+
+TODO
+* Deploy some tool proxies (REST, MCP, REST-TO-MCP)
+* See how they are visible in Apigee & API Hub.
+
+## Step 6: Create and deploy AI agent proxies
+
+TODO
+* Deploy some agent proxies (A2A)
+* See how they are visisble in Apigee & API Hub, use and debug them.
+
+## Step 7: Wrap up
+
+TODO
+* Review topics

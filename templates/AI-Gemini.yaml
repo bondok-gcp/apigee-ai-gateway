@@ -1,0 +1,26 @@
+name: AI-Gemini
+type: template
+description: API template for AI-Gemini
+features:
+  - ../features/ai-proxy-gemini.yaml
+parameters:
+  - name: GeminiBasePath
+    paths:
+      - $.endpoints[:1].basePath
+    description: The base path to offer the AI proxy on.
+    default: /gemini
+    examples:
+      - /gemini
+      - /llm
+endpoints:
+  - name: gemini
+    basePath: /gemini
+    routes:
+      - name: default
+        target: gemini
+targets:
+  - name: gemini
+    url: https://generativelanguage.googleapis.com
+    auth: GoogleAccessToken
+    scopes:
+      - https://www.googleapis.com/auth/cloud-platform
