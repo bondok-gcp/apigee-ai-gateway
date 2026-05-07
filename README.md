@@ -60,25 +60,24 @@ Now let's create an AI proxy in Apigee for Gemini from a YAML template.
 npm i apigee-templater -g
 
 # deploy the AI-Gemini template to our Apigee org
-aft -i ./templates/AI-Gemini.yaml -o $GOOGLE_CLOUD_PROJECT:$APIGEE_ENVIRONMENT
+aft -i AI-Gemini.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT
 ```
 
 Add authn/authz, cors, model armor security, pii masking, and some other features.
 
 ```sh
-aft -i ./templates/AI-Gemini.yaml -a ./features/AI-Auth.yaml
-aft -i ./templates/AI-Gemini.yaml -a ./features/AI-Security.yaml
-aft -i ./templates/AI-Gemini.yaml -a ./features/AI-Caching.yaml
-aft -i ./templates/AI-Gemini.yaml -a ./features/AI-PII-Masking.yaml
-aft -i ./templates/AI-Gemini.yaml -a ./features/CORS.yaml
+aft -a AI-Auth.yaml AI-Gemini.yaml
+aft -a AI-Caching.yaml AI-Gemini.yaml
+aft -a AI-PII-Masking.yaml AI-Gemini.yaml
+aft -a CORS.yaml AI-Gemini.yaml
 # deploy again
-aft -i ./templates/AI-Gemini.yaml -o $GOOGLE_CLOUD_PROJECT:$APIGEE_ENVIRONMENT
+aft -i AI-Gemini.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT
 ```
 
 We can also convert the YAML to a native Apigee bundle, and apply it to our org using Terraform.
 
 ```sh
-aft -i ./templates/AI-Gemini.yaml -o ./AI-Gemini.zip
+aft -i AI-Gemini.yaml -o ./AI-Gemini.zip
 cd ./tf/proxies
 terraform init
 terraform apply
