@@ -20,6 +20,7 @@ locals {
   gcp_services = [
     "apigee.googleapis.com",
     "apihub.googleapis.com",
+    "iamcredentials.googleapis.com",
     "cloudkms.googleapis.com",
     "compute.googleapis.com",
     "servicenetworking.googleapis.com",

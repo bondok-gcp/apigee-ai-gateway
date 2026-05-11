@@ -10,7 +10,7 @@ Let's get started!
 
 The only prerequisite for this lab is that you have a Google Cloud project to use.
 
-These [Google Cloud roles](https://docs.cloud.google.com/iam/docs/roles-permissions) are needed for the deployments.
+These [Google Cloud roles](https://docs.cloud.google.com/iam/docs/roles-permissions) are needed by your user for the deployments:
 
 * Apigee Organization Admin (roles/apigee.admin)
 * API Hub Admin(roles/apihub.admin)
@@ -25,19 +25,21 @@ These [Google Cloud roles](https://docs.cloud.google.com/iam/docs/roles-permissi
 
 ## Setup
 
-You will need some environment variables to run this lab.
+You will need to set these environment variables to run this lab.
 
 ```sh
-export GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
-export GOOGLE_CLOUD_LOCATION=YOUR_REGION
-export APIGEE_TYPE=EVALUATION
+GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
+GOOGLE_CLOUD_LOCATION=YOUR_REGION
+APIGEE_TYPE=EVALUATION
 ```
+
+**GOOGLE_CLOUD_PROJECT** is your GCP project that you need as a prerequisite for this lab. **GOOGLE_CLOUD_LOCATION** is one of the supported [Apigee regions](https://docs.cloud.google.com/apigee/docs/locations#available-apigee-api-analytics-regions).
 
 `APIGEE_TYPE` can be either `PAYG` for pay-as-you-go with pricing as documented [here](https://cloud.google.com/apigee/pricing), TRIAL for a 60 day free trial, or SUBSCRIPTION if your project has an Apigee subscription.
 
 Click  <walkthrough-editor-open-file filePath="env.sh">here</walkthrough-editor-open-file> to open the `env.sh` file in the editor.
 
-Then run the `source env.sh` command to load the variables.
+Set your values, save the file, and then run the `source env.sh`.
 
 ```sh
 source env.sh
@@ -62,7 +64,7 @@ terraform apply -var "project_id=$GOOGLE_CLOUD_PROJECT" -var "region=$GOOGLE_CLO
 cd ../..
 ```
 
-Provisioning takes between 30-60 minutes for Apigee, API Hub, a Global Load Balancer, Certificates, etc.. to be provisioned.
+Provisioning takes between 30-60 minutes for Apigee, API Hub, a Global Load Balancer, Certificates, etc.. to be completed.
 
 ### Save Apigee environment information
 
@@ -93,7 +95,7 @@ apigeecli datacollectors create -d "Time to first token" -n dc_ai_time_first_tok
 
 ### Create AI service account
 
-Let's also enable the Agent Platform in Google Cloud, and create a service account user.
+Let's also enable the Agent Platform in Google Cloud, and create a service account user, as well as assign our user as token creator.
 
 ```sh
 gcloud services enable aiplatform.googleapis.com --project $GOOGLE_CLOUD_PROJECT
@@ -104,6 +106,17 @@ gcloud iam service-accounts create "ai-service" --project="$GOOGLE_CLOUD_PROJECT
 gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
     --member="serviceAccount:ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com" \
     --role="roles/aiplatform.user"
+
+gcloud iam service-accounts add-iam-policy-binding \
+  ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com \
+  --member="user:$(gcloud config get-value account 2>/dev/null)" \
+  --role="roles/iam.serviceAccountTokenCreator"
+
+PROJECT_NUMBER=$(gcloud projects describe $GOOGLE_CLOUD_PROJECT --format="value(projectNumber)")
+gcloud iam service-accounts add-iam-policy-binding \
+  ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com \
+  --member="serviceAccount:apigee-$PROJECT_NUMBER@gcp-sa-apigee.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountTokenCreator" --project $GOOGLE_CLOUD_PROJECT
 ```
 
 ---
@@ -116,24 +129,10 @@ Now let's test if the Gemini API on [Gemini Enterprise Agent Platfrom](https://d
 curl -i -X POST "https://aiplatform.googleapis.com/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" \
 -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
 -H "Content-Type: application/json" \
---data-binary @- << EOF 
-
-{
-  "contents": [
-    {
-      "role": "USER",
-      "parts": [
-        {
-          "text": "why is the sky blue?"
-        }
-      ]
-    }
-  ]
-}
-EOF
+-d '{"contents": [{"role": "USER", "parts": [{"text": "why is the sky blue?"}]}]}'
 ```
 
-You should get a response with an answer candidate. 
+You should get a response with an answer candidate with some text about 'Rayleigh scattering'. 
 
 ---
 
@@ -164,6 +163,49 @@ aft -i AI-Analytics.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Analytics:$APIGEE_ENVIRONME
 ```
 
 Now open both deployed proxies in the [Apigee console](https://console.cloud.google.com/apigee/proxies) and take a look at the configuration there.
+
+---
+## Configure a Product to access Gemini
+
+Import a [product definition](https://docs.cloud.google.com/apigee/docs/api-platform/publish/what-api-product) to manage authorization & access to models and token quotas.
+
+```sh
+apigeecli products import -o $GOOGLE_CLOUD_PROJECT -f AI-Gemini-Product.json --default-token
+```
+
+Open the product definition in the [Apigee console](https://console.cloud.google.com/apigee/apiproducts) and take a look at the configuration. Notice how there is a token quota on **gemini-flash-latest**.
+
+Go to the **Developers** and **Apps** pages. Register a developer and an app, and get a **Credential Key** that can be used to access the proxy endpoint.
+
+Save the key in an environment variable.
+
+```sh
+API_KEY=YOUR_KEY
+```
+
+---
+
+## Call the Gemini proxy
+
+Call the Gemini proxy endpoint with the same prompt as before. Notice the **/gemini** in the path below, which routes the traffic through our proxy.
+
+```sh
+curl -i -X POST "https://$APIGEE_HOST/gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" \
+-H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+-H "Content-Type: application/json" \
+-d '{"contents": [{"role": "USER", "parts": [{"text": "why is the sky blue?"}]}]}'
+```
+
+You should get a **401** unauthorized response. Now let's add our API key, and remove the Google Cloud credentials.
+
+Run the same call with our API key:
+
+```sh
+curl -i -X POST "https://$APIGEE_HOST/gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" \
+-H "x-api-key: $API_KEY" \
+-H "Content-Type: application/json" \
+-d '{"contents": [{"role": "USER", "parts": [{"text": "why is the sky blue?"}]}]}'
+```
 
 ---
 

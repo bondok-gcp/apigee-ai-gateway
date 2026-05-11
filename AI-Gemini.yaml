@@ -3,12 +3,13 @@ type: template
 description: API template for AI-Gemini
 features:
   - AI-Proxy-AgentPlatform.yaml
+  - AI-Auth.yaml
 parameters:
   - name: ModelBasePath
     paths:
       - $.endpoints[:1].basePath
     description: The base path to offer the AI proxy on.
-    default: gemini
+    default: /gemini
     examples:
       - /gemini
       - /llm

@@ -1,0 +1,49 @@
+[{
+  "name": "Gemini Product",
+  "displayName": "Gemini Product",
+  "approvalType": "auto",
+  "attributes": [
+    {
+      "name": "access",
+      "value": "public"
+    }
+  ],
+  "environments": [
+    "dev"
+  ],
+  "createdAt": "1778486511834",
+  "lastModifiedAt": "1778486511834",
+  "operationGroup": {
+    "operationConfigs": [
+      {
+        "apiSource": "AI-Analytics",
+        "operations": [
+          {
+            "resource": "/"
+          }
+        ],
+        "quota": {}
+      }
+    ],
+    "operationConfigType": "proxy"
+  },
+  "llmOperationGroup": {
+    "operationConfigs": [
+      {
+        "apiSource": "AI-Gemini",
+        "llmOperations": [
+          {
+            "resource": "/",
+            "model": "gemini-flash-latest"
+          }
+        ],
+        "llmTokenQuota": {
+          "limit": "10000",
+          "interval": "1",
+          "timeUnit": "minute"
+        }
+      }
+    ]
+  }
+}
+]
