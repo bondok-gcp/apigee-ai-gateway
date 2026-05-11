@@ -37,13 +37,6 @@ resource "google_project_service" "enabled_apis" {
   disable_on_destroy = false
 }
 
-resource "google_compute_network" "auto_vpc" {
-  name                    = "default"
-  auto_create_subnetworks = true
-  routing_mode            = "REGIONAL"
-  depends_on              = [google_project_service.enabled_apis]
-}
-
 resource "google_compute_global_address" "external_vip" {
   name         = "apigee-external-vip"
   address_type = "EXTERNAL"
