@@ -1,146 +1,181 @@
-/**
- * Copyright 2023 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/* Variables */
+
+variable "project_id" {
+  description = "Project id (also used for the Apigee Organization)."
+  type        = string
+}
+
+variable "region" {
+  description = "GCP region for the Apigee runtime & analytics data (see https://cloud.google.com/apigee/docs/api-platform/get-started/install-cli)."
+  type        = string
+}
+
+variable "apigee_type" {
+  description = "The Apigee billing type, either EVALUATION, PAYG or SUBSCRIPTION."
+  type        = string
+  default     = "EVALUATION"
+}
 
 locals {
-  psc_subnet_region_name = { for subnet in var.psc_ingress_subnets :
-    subnet.region => "${subnet.region}/${subnet.name}"
-  }
-}
-
-module "project" {
-  source          = "github.com/terraform-google-modules/cloud-foundation-fabric//modules/project?ref=v15.0.0"
-  name            = var.project_id
-  parent          = var.project_parent
-  billing_account = var.billing_id
-  project_create  = var.project_create
-  services = [
+  gcp_services = [
     "apigee.googleapis.com",
+    "apihub.googleapis.com",
     "cloudkms.googleapis.com",
     "compute.googleapis.com",
-    "servicenetworking.googleapis.com"
+    "servicenetworking.googleapis.com",
+    "aiplatform.googleapis.com"
   ]
-  policy_boolean = {
-    "constraints/compute.requireOsLogin" = false
-    "constraints/compute.requireShieldedVm" = false
-  }
-  policy_list = {
-    "constraints/iam.allowedPolicyMemberDomains" = {
-        inherit_from_parent: false
-        status: true
-        suggested_value: null
-        values: [],
-        allow: {
-          all=true
-        }
-    },
-    "constraints/compute.vmExternalIpAccess" = {
-        inherit_from_parent: false
-        status: true
-        suggested_value: null
-        values: [],
-        allow: {
-          all=true
-        }
-    }
-  }
 }
 
-module "vpc" {
-  source     = "github.com/terraform-google-modules/cloud-foundation-fabric//modules/net-vpc?ref=v28.0.0"
-  project_id = module.project.project_id
-  name       = var.network
-  psa_config = {
-    ranges = {
-      apigee-range         = var.peering_range
-      apigee-support-range = var.support_range
-    }
+/* Project */
+
+resource "google_project_service" "enabled_apis" {
+  for_each           = toset(local.gcp_services)
+  project            = var.project_id
+  service            = each.value
+  disable_on_destroy = false
+}
+
+resource "google_compute_network" "auto_vpc" {
+  name                    = "default"
+  auto_create_subnetworks = true
+  routing_mode            = "REGIONAL"
+  depends_on              = [google_project_service.enabled_apis]
+}
+
+resource "google_compute_global_address" "external_vip" {
+  name         = "apigee-external-vip"
+  address_type = "EXTERNAL"
+  ip_version   = "IPV4"
+  depends_on   = [google_project_service.enabled_apis]
+}
+
+resource "google_compute_managed_ssl_certificate" "nip_io_cert" {
+  name = "apigee-nip-io-cert"
+
+  managed {
+    domains = ["${google_compute_global_address.external_vip.address}.nip.io"]
   }
 }
 
-module "nip-development-hostname" {
-  source             = "github.com/apigee/terraform-modules/modules/nip-development-hostname"
-  project_id         = module.project.project_id
-  address_name       = "apigee-external"
-  subdomain_prefixes = [for name, _ in var.apigee_envgroups : name]
+/* Apigee */
+
+resource "google_apigee_organization" "apigee_org" {
+  project_id          = var.project_id
+  analytics_region    = var.region
+  disable_vpc_peering = true
+  runtime_type        = "CLOUD"
+  billing_type        = var.apigee_type
+  depends_on          = [google_project_service.enabled_apis]
 }
 
-/**
-billing_type = PAYG, EVALUATION, SUBSCRIPTION
-*/
-
-module "apigee-x-core" {
-  source              = "github.com/apigee/terraform-modules/modules/apigee-x-core"
-  billing_type        = var.apigee_billing_type
-  project_id          = module.project.project_id
-  ax_region           = var.region
-  apigee_environments = var.apigee_environments
-  apigee_envgroups = {
-    for name, env_group in var.apigee_envgroups : name => {
-      hostnames = concat(env_group.hostnames, ["${name}.${module.nip-development-hostname.hostname}"])
-    }
-  }
-  apigee_instances = var.apigee_instances
-  network          = module.vpc.network.id
+resource "google_apigee_instance" "apigee" {
+  name                 = "apigee-psc-instance"
+  location             = var.region
+  org_id               = google_apigee_organization.apigee_org.id
+  consumer_accept_list = [var.project_id]
 }
 
-module "psc-ingress-vpc" {
-  source                  = "github.com/terraform-google-modules/cloud-foundation-fabric//modules/net-vpc?ref=v28.0.0"
-  project_id              = module.project.project_id
-  name                    = var.psc_ingress_network
-  auto_create_subnetworks = false
-  subnets                 = var.psc_ingress_subnets
-}
-
-resource "google_compute_region_network_endpoint_group" "psc_neg" {
-  project               = var.project_id
-  for_each              = var.apigee_instances
-  name                  = "psc-neg-${each.value.region}"
-  region                = each.value.region
-  network               = module.psc-ingress-vpc.network.id
-  subnetwork            = module.psc-ingress-vpc.subnet_self_links[local.psc_subnet_region_name[each.value.region]]
+resource "google_compute_region_network_endpoint_group" "apigee_psc_neg" {
+  name                  = "apigee-psc-neg"
+  region                = var.region
   network_endpoint_type = "PRIVATE_SERVICE_CONNECT"
-  psc_target_service    = module.apigee-x-core.instance_service_attachments[each.value.region]
-  lifecycle {
-    create_before_destroy = true
+  psc_target_service    = google_apigee_instance.apigee.service_attachment
+}
+
+resource "google_compute_backend_service" "apigee_backend" {
+  name                  = "apigee-psc-backend"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  protocol              = "HTTPS"
+
+  backend {
+    group = google_compute_region_network_endpoint_group.apigee_psc_neg.id
   }
 }
 
-module "nb-psc-l7xlb" {
-  source          = "github.com/apigee/terraform-modules/modules/nb-psc-l7xlb"
-  project_id      = module.project.project_id
-  name            = "apigee-xlb-psc"
-  ssl_certificate = [module.nip-development-hostname.ssl_certificate]
-  external_ip     = module.nip-development-hostname.ip_address
-  psc_negs        = [for _, psc_neg in google_compute_region_network_endpoint_group.psc_neg : psc_neg.id]
+resource "google_compute_url_map" "url_map" {
+  name            = "apigee-psc-url-map"
+  default_service = google_compute_backend_service.apigee_backend.id
 }
 
-# This was necessary to give the project time to apply the 
-# resource "time_sleep" "wait" {
-#   depends_on = [module.project]
+resource "google_compute_target_https_proxy" "https_proxy" {
+  name             = "apigee-psc-https-proxy"
+  url_map          = google_compute_url_map.url_map.id
+  ssl_certificates = [google_compute_managed_ssl_certificate.nip_io_cert.id]
+}
 
-#   create_duration = "120s"
-# }
+resource "google_compute_global_forwarding_rule" "https_forwarding_rule" {
+  name                  = "apigee-psc-forwarding-rule"
+  ip_address            = google_compute_global_address.external_vip.address
+  target                = google_compute_target_https_proxy.https_proxy.id
+  port_range            = "443"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+}
 
-# resource "google_project_iam_member" "member-role" {
-#   for_each = toset([
-#     "roles/editor",
-#     "roles/apigee.admin"
-#   ])
-#   role = each.key
-#   member = "user:${var.apigee_admin}"
-#   project = module.project.project_id
-#   depends_on = [ module.apigee-x-core ]
-# }
+resource "google_apigee_environment" "dev_env" {
+  name         = "dev"
+  org_id       = google_apigee_organization.apigee_org.id
+  display_name = "Development Environment"
+  description  = "Development environment for API proxy deployments"
+}
+
+resource "google_apigee_envgroup" "dev_envgroup" {
+  name      = "dev"
+  org_id    = google_apigee_organization.apigee_org.id
+  hostnames = ["${google_compute_global_address.external_vip.address}.nip.io"]
+}
+
+resource "google_apigee_envgroup_attachment" "dev_envgroup_attachment" {
+  envgroup_id = google_apigee_envgroup.dev_envgroup.id
+  environment = google_apigee_environment.dev_env.name
+}
+
+resource "google_apigee_instance_attachment" "dev_instance_attachment" {
+  instance_id = google_apigee_instance.apigee.id
+  environment = google_apigee_environment.dev_env.name
+}
+
+output "apigee_endpoint_url" {
+  value       = "https://${google_compute_global_address.external_vip.address}.nip.io"
+  description = "Your public secure Apigee API endpoint."
+}
+
+/* API Hub */
+
+resource "google_apihub_host_project_registration" "apihub_host_project" {
+  project                      = var.project_id
+  location                     = var.region
+  host_project_registration_id = var.project_id
+  gcp_project                  = "projects/${var.project_id}"
+
+  depends_on = [google_project_service.enabled_apis, google_apigee_instance.apigee]
+}
+
+resource "google_project_service_identity" "apihub_service_identity" {
+  provider = google-beta
+  project  = var.project_id
+  service  = "apihub.googleapis.com"
+}
+
+resource "google_project_iam_member" "apihub_service_identity_permission" {
+  provider = google-beta
+  project  = var.project_id
+  for_each = toset([
+    "roles/apihub.admin",
+    "roles/apihub.runtimeProjectServiceAgent"
+  ])
+  role       = each.key
+  member     = "serviceAccount:${google_project_service_identity.apihub_service_identity.email}"
+  depends_on = [google_project_service_identity.apihub_service_identity]
+}
+
+resource "google_apihub_api_hub_instance" "apihub-instance" {
+  provider = google-beta
+  project  = var.project_id
+  location = var.region
+  config {
+    disable_search  = false
+    vertex_location = "eu"
+  }
+  depends_on = [google_apihub_host_project_registration.apihub_host_project]
+}

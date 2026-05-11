@@ -1,6 +1,14 @@
 # Apigee AI Gateway Lab
 This lab guides the user through templating a complete AI Gateway to manage & govern the usage of models, tools & agents in the organization.
 
+## Cloud Shell tutorial
+
+You can do this tutorial in an interactive Cloud Shell using this link:
+
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://ssh.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/tyayers/apigee-aigateway-lab&cloudshell_git_branch=main&cloudshell_workspace=.&cloudshell_tutorial=TUTORIAL.md)
+
+Or you can do it manually using these steps.
+
 ## Step 1: Prerequisites
 You will need a **Google Cloud Project** with the project permissions to provision [Apigee]([url](https://cloud.google.com/apigee)) and a [Google Cloud Load Balancer]([url](https://cloud.google.com/load-balancing)) to ingest traffic.
 
@@ -24,10 +32,9 @@ You will need a provisioned org before proceeding with this lab.
 To provision Apigee with [Terraform](url) in your project:
 
 ```sh
-BILLING_ID=YOUR_BILLING_ID
 cd ./tf/provision
 terraform init
-terraform apply -var "project_id=$GOOGLE_CLOUD_PROJECT" -var "billing_id=$BILLING_ID" \
+terraform apply -var "project_id=$GOOGLE_CLOUD_PROJECT" -var "region=$GOOGLE_CLOUD_LOCATION" \
 --var-file=variables.tfvars
 cd ../..
 ```
@@ -35,6 +42,20 @@ cd ../..
 To provision with the wizard in the Google Cloud console:
 
 ![Apigee provisioning wizard](https://raw.githubusercontent.com/tyayers/public-files/refs/heads/main/apigee/apigee-aigw-provision.png)
+
+## Step 4: Prepare Google Cloud project
+We will need to enable access to Agent Platform models, as well as a Service Account to access those models. 
+
+```bash
+gcloud services enable aiplatform.googleapis.com --project $GOOGLE_CLOUD_PROJECT
+
+gcloud iam service-accounts create "ai-service" --project="$GOOGLE_CLOUD_PROJECT" \
+    --description="AI service account" \
+    --display-name="API Service Account"
+gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+    --member="serviceAccount:ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com" \
+    --role="roles/aiplatform.user"
+```
 
 ## Step 3: Create and deploy AI model proxies
 A **proxy** in Apigee transfers, secures & mediates any type of network API traffic, so to start we're going to secure the **AI model** access.
@@ -56,11 +77,11 @@ echo $APIGEE_HOST
 Now let's create an AI proxy in Apigee for Gemini from a YAML template.
 
 ```sh
-# install apigee feature templater (aft) globally
+# install apigee-templater, if not already installed
 npm i apigee-templater -g
 
 # deploy the AI-Gemini template to our Apigee org
-aft -i AI-Gemini.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT
+aft -i AI-Gemini.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT:ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com
 ```
 
 Add authn/authz, cors, model armor security, pii masking, and some other features.
