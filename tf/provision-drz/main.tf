@@ -17,9 +17,9 @@ variable "network" {
 }
 
 variable "apigee_type" {
-  description = "The Apigee billing type, either EVALUATION, PAYG or SUBSCRIPTION."
+  description = "The Apigee billing type, either PAYG or SUBSCRIPTION."
   type        = string
-  default     = "EVALUATION"
+  default     = "PAYG"
 }
 
 locals {
@@ -38,6 +38,10 @@ locals {
     ? google_compute_network.auto_vpc[0].id
     : data.google_compute_network.existing_network[0].id
   )
+}
+
+provider "google" {
+  apigee_custom_endpoint = "https://eu-apigee.googleapis.com/v1/"
 }
 
 /* Project */
@@ -81,12 +85,13 @@ resource "google_compute_managed_ssl_certificate" "nip_io_cert" {
 /* Apigee */
 
 resource "google_apigee_organization" "apigee_org" {
-  project_id          = var.project_id
-  analytics_region    = var.region
-  disable_vpc_peering = true
-  runtime_type        = "CLOUD"
-  billing_type        = var.apigee_type
-  depends_on          = [google_project_service.enabled_apis]
+  project_id                 = var.project_id
+  analytics_region           = var.region
+  api_consumer_data_location = var.region
+  disable_vpc_peering        = true
+  runtime_type               = "CLOUD"
+  billing_type               = var.apigee_type
+  depends_on                 = [google_project_service.enabled_apis]
 }
 
 resource "google_apigee_instance" "apigee" {

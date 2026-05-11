@@ -19,7 +19,7 @@ These [Google Cloud roles](https://docs.cloud.google.com/iam/docs/roles-permissi
 * Compute Admin (roles/compute.admin)
 * Compute Network Admin (roles/compute.networkAdmin)
 * Cloud KMS Admin (roles/cloudkms.admin)
-* AI Platform Admin (roles/ml.admin)
+* Agent Platform Admin (roles/ml.admin)
 
 ---
 
@@ -27,22 +27,24 @@ These [Google Cloud roles](https://docs.cloud.google.com/iam/docs/roles-permissi
 
 You will need to set these environment variables to run this lab.
 
+| Variable | Description |
+| -------- | ----------- |
+| GOOGLE_CLOUD_PROJECT | Your Google Cloud project id |
+| GOOGLE_CLOUD_LOCATION | Your Google Cloud region for the Apigee region |
+| APIGEE_TYPE | The type of Apigee deployment (either EVALUATION (valid for 60 days), PAYG (consumption pricing, path to production), or SUBSCRIPTION (fixed pricing)) |
+
+To set these, you can easily copy the `env.sh` file to a local `.env` file.
+
 ```sh
-GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
-GOOGLE_CLOUD_LOCATION=YOUR_REGION
-APIGEE_TYPE=EVALUATION
+cp env.sh .env
 ```
 
-**GOOGLE_CLOUD_PROJECT** is your GCP project that you need as a prerequisite for this lab. **GOOGLE_CLOUD_LOCATION** is one of the supported [Apigee regions](https://docs.cloud.google.com/apigee/docs/locations#available-apigee-api-analytics-regions).
+Click  <walkthrough-editor-open-file filePath=".env">here</walkthrough-editor-open-file> to open the `.env` file in the editor.
 
-`APIGEE_TYPE` can be either `PAYG` for pay-as-you-go with pricing as documented [here](https://cloud.google.com/apigee/pricing), TRIAL for a 60 day free trial, or SUBSCRIPTION if your project has an Apigee subscription.
-
-Click  <walkthrough-editor-open-file filePath="env.sh">here</walkthrough-editor-open-file> to open the `env.sh` file in the editor.
-
-Set your values, save the file, and then run the `source env.sh`.
+Set your values, save the file, and then run the `source .env`.
 
 ```sh
-source env.sh
+source .env
 ```
 
 ---
@@ -206,6 +208,8 @@ curl -i -X POST "https://$APIGEE_HOST/gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/l
 -H "Content-Type: application/json" \
 -d '{"contents": [{"role": "USER", "parts": [{"text": "why is the sky blue?"}]}]}'
 ```
+
+You should get again the response with **bold**
 
 ---
 
