@@ -28,6 +28,10 @@ locals {
   ]
 }
 
+provider "google" {
+  apigee_custom_endpoint = "https://eu-apigee.googleapis.com/v1/"
+}
+
 /* Project */
 
 resource "google_project_service" "enabled_apis" {
@@ -55,12 +59,13 @@ resource "google_compute_managed_ssl_certificate" "nip_io_cert" {
 /* Apigee */
 
 resource "google_apigee_organization" "apigee_org" {
-  project_id          = var.project_id
-  analytics_region    = var.region
-  disable_vpc_peering = true
-  runtime_type        = "CLOUD"
-  billing_type        = var.apigee_type
-  depends_on          = [google_project_service.enabled_apis]
+  project_id                 = var.project_id
+  analytics_region           = var.region
+  api_consumer_data_location = var.region
+  disable_vpc_peering        = true
+  runtime_type               = "CLOUD"
+  billing_type               = var.apigee_type
+  depends_on                 = [google_project_service.enabled_apis]
 }
 
 resource "google_apigee_instance" "apigee" {
