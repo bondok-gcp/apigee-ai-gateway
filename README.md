@@ -1,5 +1,7 @@
 # Apigee AI Gateway Lab
-This lab guides the user through templating a complete AI Gateway to manage & govern the usage of models, tools & agents in the organization.
+This lab guides you through deploying an Apigee AI Gateway into a Google Cloud project, and applying AI proxies and policies to manage, govern and secure the complete AI communication, from models to tools and agents.
+
+![Apigee AI Gateway Architecture](https://i.postimg.cc/Y9z80jqs/Screenshot-From-2026-05-12-10-02-26.png)
 
 ## Cloud Shell tutorial
 
