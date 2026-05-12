@@ -1,7 +1,14 @@
 # Apigee AI Gateway Lab
 This lab guides you through deploying an Apigee AI Gateway into a Google Cloud project, and applying AI proxies and policies to manage, govern and secure the complete AI communication, from models to tools and agents.
 
-![Apigee AI Gateway Architecture](https://i.postimg.cc/rs8TRdGs/Screenshot-From-2026-05-12-10-02-26.png)
+## Lab targets
+* Simple deployment of Apigee + AI proxy templates in a GCP project with **battle-tested, simple terraform**.
+* AI proxy templates for **Gemini, Claude, DeepSeek, Qwen**, and other models form Agent Platform Model Garden.
+* Feature demonstrations of adding **authentication/authorization, token quotas, model armor, model failover**, other core AI features.
+* Demonstration of AI proxy being used with **Gemini CLI, Claude Code**, other coding tools.
+* Deployment of an **Apigee AI Portal** that shows models, tools & agents, show self-service management of organization access.
+* Demonstration of **AI analytics**, token counts, time to first token, etc..
+
 
 ## Cloud Shell tutorial
 
