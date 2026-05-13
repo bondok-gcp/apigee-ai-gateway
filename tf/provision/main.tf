@@ -16,6 +16,18 @@ variable "network" {
   default     = ""
 }
 
+variable "subnet" {
+  description = "VPC subnetwork name, default is created if empty."
+  type        = string
+  default     = null
+}
+
+variable "drz_location" {
+  description = "The DRZ location to use for deploying Apigee, either US (United States), EU (Europeean Union) or IN (India), or empty for global."
+  type        = string
+  default     = null
+}
+
 variable "apigee_type" {
   description = "The Apigee billing type, either EVALUATION, PAYG or SUBSCRIPTION."
   type        = string
@@ -38,6 +50,16 @@ locals {
     ? google_compute_network.auto_vpc[0].id
     : data.google_compute_network.existing_network[0].id
   )
+
+  subnet_id = (
+    length(google_compute_network.auto_vpc) == 0
+    ? data.google_compute_subnetwork.existing_subnet[0].id
+    : null
+  )
+}
+
+provider "google" {
+  apigee_custom_endpoint = var.drz_location != "" && var.drz_location != null ? "https://${var.drz_location}-apigee.googleapis.com/v1/" : "https://apigee.googleapis.com/v1/"
 }
 
 /* Project */
@@ -63,6 +85,14 @@ data "google_compute_network" "existing_network" {
   depends_on = [google_project_service.enabled_apis]
 }
 
+data "google_compute_subnetwork" "existing_subnet" {
+  count      = (var.subnet != null) ? 1 : 0
+  name       = var.subnet
+  project    = var.project_id
+  region     = var.region
+  depends_on = [google_project_service.enabled_apis]
+}
+
 resource "google_compute_global_address" "external_vip" {
   name         = "apigee-external-vip"
   address_type = "EXTERNAL"
@@ -81,12 +111,13 @@ resource "google_compute_managed_ssl_certificate" "nip_io_cert" {
 /* Apigee */
 
 resource "google_apigee_organization" "apigee_org" {
-  project_id          = var.project_id
-  analytics_region    = var.region
-  disable_vpc_peering = true
-  runtime_type        = "CLOUD"
-  billing_type        = var.apigee_type
-  depends_on          = [google_project_service.enabled_apis]
+  project_id                 = var.project_id
+  analytics_region           = var.region
+  api_consumer_data_location = var.region
+  disable_vpc_peering        = true
+  runtime_type               = "CLOUD"
+  billing_type               = var.apigee_type
+  depends_on                 = [google_project_service.enabled_apis]
   lifecycle {
     ignore_changes = [analytics_region]
   }
@@ -111,6 +142,7 @@ resource "google_compute_backend_service" "apigee_backend" {
   name                  = "apigee-psc-backend"
   load_balancing_scheme = "EXTERNAL_MANAGED"
   protocol              = "HTTPS"
+  timeout_sec           = 600
 
   backend {
     group = google_compute_region_network_endpoint_group.apigee_psc_neg.id

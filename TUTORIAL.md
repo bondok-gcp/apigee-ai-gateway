@@ -61,13 +61,13 @@ source .env
 
 You can provision your Apigee instance in any of the ways documented [here](https://docs.cloud.google.com/apigee/docs/api-platform/get-started/provisioning-options).
 
-For a simple **TRIAL** deployment, we can run the sample Terraform deployment in this lab, which also creates a load balancer and test certificate to access the instance.
+For a simple automated deployment, we can run the sample Terraform deployment in this lab, which also creates a load balancer and test certificate to access the instance.
 
 Take a look at the <walkthrough-editor-open-file filePath="tf/provision/main.tf">main.tf</walkthrough-editor-open-file> file to see the resources created.
 
 To provision the lab sample Apigee instance, run these commands now.
 
-### Provision global control plane with default VPC
+### Provision Apigee environment
 
 ```sh
 cd tf/provision
@@ -76,16 +76,9 @@ terraform apply -var "project_id=$GOOGLE_CLOUD_PROJECT" -var "region=$GOOGLE_CLO
 cd ../..
 ```
 
-### Provision regional EU control plane with custom VPC / subnet
+If you want to provision in your own network or with DRZ enabled, add any of these variables on the command line: ` --var "drz_location=$APIGEE_DRZ_LOCATION" --var "apigee_type=$APIGEE_TYPE" --var "network=$APIGEE_VPC_NAME" --var "subnet=$APIGEE_SUBNET_NAME"`.
 
-```sh
-cd tf/provision-drz
-terraform init
-terraform apply -var "project_id=$GOOGLE_CLOUD_PROJECT" -var "region=$GOOGLE_CLOUD_LOCATION" --var "apigee_type=$APIGEE_TYPE" --var "network=$APIGEE_VPC_NAME" --var "subnet=$APIGEE_SUBNET_NAME"
-cd ../..
-```
-
-Provisioning takes between 30-60 minutes for Apigee, API Hub, a Global Load Balancer, Certificates, etc.. to be completed.
+Provisioning takes around 20-30 minutes for Apigee, API Hub, a Global Load Balancer, Certificates, etc.. to be completed.
 
 ### Save Apigee environment information
 
