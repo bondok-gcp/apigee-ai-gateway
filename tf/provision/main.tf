@@ -87,6 +87,9 @@ resource "google_apigee_organization" "apigee_org" {
   runtime_type        = "CLOUD"
   billing_type        = var.apigee_type
   depends_on          = [google_project_service.enabled_apis]
+  lifecycle {
+    ignore_changes = [analytics_region]
+  }
 }
 
 resource "google_apigee_instance" "apigee" {

@@ -22,6 +22,12 @@ variable "subnet" {
   default     = null
 }
 
+variable "drz_location" {
+  description = "The DRZ location to use for deploying Apigee, either US (United States), EU (Europeean Union) or IN (India)."
+  type        = string
+  default     = "eu"
+}
+
 variable "apigee_type" {
   description = "The Apigee billing type, either PAYG or SUBSCRIPTION."
   type        = string
@@ -53,7 +59,7 @@ locals {
 }
 
 provider "google" {
-  apigee_custom_endpoint = "https://eu-apigee.googleapis.com/v1/"
+  apigee_custom_endpoint = "https://${var.drz_location}-apigee.googleapis.com/v1/"
 }
 
 /* Project */
@@ -112,6 +118,9 @@ resource "google_apigee_organization" "apigee_org" {
   runtime_type               = "CLOUD"
   billing_type               = var.apigee_type
   depends_on                 = [google_project_service.enabled_apis]
+  lifecycle {
+    ignore_changes = [analytics_region]
+  }
 }
 
 resource "google_apigee_instance" "apigee" {
@@ -123,6 +132,7 @@ resource "google_apigee_instance" "apigee" {
 
 resource "google_compute_region_network_endpoint_group" "apigee_psc_neg" {
   name                  = "apigee-psc-neg"
+  project               = var.project_id
   region                = var.region
   network_endpoint_type = "PRIVATE_SERVICE_CONNECT"
   psc_target_service    = google_apigee_instance.apigee.service_attachment

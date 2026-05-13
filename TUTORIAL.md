@@ -33,6 +33,14 @@ You will need to set these environment variables to run this lab.
 | GOOGLE_CLOUD_LOCATION | Your Google Cloud region for the Apigee region |
 | APIGEE_TYPE | The type of Apigee deployment (either EVALUATION (valid for 60 days), PAYG (consumption pricing, path to production), or SUBSCRIPTION (fixed pricing)) |
 
+Additionally these optional variables can be set if you want to use an existing VPC and subnet, or use a DRZ data residency location.
+
+| Optional Variable | Description |
+| -------- | ----------- |
+| APIGEE_VPC_NAME | The name of your existing VPC to use for Apigee |
+| APIGEE_SUBNET_NAME | The name of your existing VPC subnet to use for Apigee |
+| APIGEE_DRZ_LOCATION | The optional DRZ data residency location for Apigee data (US, EU or IN) |
+
 To set these, you can easily copy the `env.sh` file to a local `.env` file.
 
 ```sh
@@ -73,7 +81,7 @@ cd ../..
 ```sh
 cd tf/provision-drz
 terraform init
-terraform apply -var "project_id=$GOOGLE_CLOUD_PROJECT" -var "region=$GOOGLE_CLOUD_LOCATION" --var "apigee_type=$APIGEE_TYPE" --var "network=YOUR_NETWORK" --var "subnet=YOUR_SUBNET"
+terraform apply -var "project_id=$GOOGLE_CLOUD_PROJECT" -var "region=$GOOGLE_CLOUD_LOCATION" --var "apigee_type=$APIGEE_TYPE" --var "network=$APIGEE_VPC_NAME" --var "subnet=$APIGEE_SUBNET_NAME"
 cd ../..
 ```
 
