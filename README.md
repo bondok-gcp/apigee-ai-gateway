@@ -1,5 +1,5 @@
 # AI Gateway Labs on Google Cloud
-These labs guide you through creating an AI Gateway on Google Cloud, making it easy to secure & govern AI traffic to and from models, tools and agents. This approach also integrates easily into [Gemini Enterprise Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform) and [Agent Gateway](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/gateways/agent-gateway-overview), as well as to any other models, tools or agent platforms.
+These labs guide you through creating an AI Gateway on Google Cloud leveraging [Apigee](https://cloud.google.com/solutions/apigee-ai), [Model Garden](https://cloud.google.com/model-garden), [Google Cloud Networking](https://docs.cloud.google.com/docs/networking) and [Security Services](https://docs.cloud.google.com/docs/security/overview/whitepaper) to secure & govern AI traffic to and from models, tools and agents. This approach integrates easily into [Gemini Enterprise Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform) and [Agent Gateway](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/gateways/agent-gateway-overview), as well as to any other models, tools or agent platforms.
 
 ![AI Gateway Overview](https://iili.io/Bm91xHB.png)
 
@@ -12,7 +12,7 @@ These labs guide you through creating an AI Gateway on Google Cloud, making it e
 
 ## Prerequisites
 To run these labs you will need:
-* A pre-created [Google Cloud sandbox project](https://docs.cloud.google.com/resource-manager/docs/creating-managing-projects) with either **Owner** or these roles assigned.
+* A pre-created [Google Cloud sandbox project](https://docs.cloud.google.com/resource-manager/docs/creating-managing-projects) with either **Owner** or these roles assigned (apigee.admin, apihub.admin, serviceusage.serviceUsageAdmin, iam.serviceAccountAdmin, compute.admin, compute.networkAdmin, cloudkms.admin, roles/ml.admin).
 
 ## Cloud Shell labs
 
