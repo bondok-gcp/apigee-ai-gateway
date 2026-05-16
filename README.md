@@ -12,13 +12,13 @@ These labs guide you through creating an AI Gateway on Google Cloud leveraging [
 
 ## Prerequisites
 To run these labs you will need:
-* A pre-created [Google Cloud sandbox project](https://docs.cloud.google.com/resource-manager/docs/creating-managing-projects) with either the role **roles/owner** or these roles assigned (**apigee.admin, apihub.admin, serviceusage.serviceUsageAdmin, iam.serviceAccountAdmin, compute.admin, compute.networkAdmin, cloudkms.admin, roles/ml.admin**).
+* A pre-created [Google Cloud sandbox project](https://docs.cloud.google.com/resource-manager/docs/creating-managing-projects) with either the role **roles/owner**, or these roles assigned: **apigee.admin, apihub.admin, serviceusage.serviceUsageAdmin, iam.serviceAccountAdmin, compute.admin, compute.networkAdmin, cloudkms.admin, roles/ml.admin**.
 
 ## Cloud Shell labs
 
 The labs are organized as [Google Cloud Shell Tutorials](https://docs.cloud.google.com/shell/docs/cloud-shell-tutorials/tutorials), and can run interactively in your own project.
 
-### 🧱 AI Gateway Foundations lab
+### 🧱 AI Gateway Foundations Lab
 
 In this lab you will:
 * Provision an **Apigee X** instance (either as Evaluation, Pay-as-you-go, or Subscription) in your chosen Google Cloud project and region using **Terraform**, using either the global or regional DRZ (US, EU, IN) control planes.
@@ -29,4 +29,4 @@ In this lab you will:
 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://ssh.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/tyayers/apigee-aigateway-lab&cloudshell_git_branch=main&cloudshell_workspace=.&cloudshell_tutorial=TUTORIAL.md)
 
-Or direct [markdown](https://github.com/tyayers/ai-gateway-labs/blob/main/TUTORIAL.md) link.
+Direct [markdown](https://github.com/tyayers/ai-gateway-labs/blob/main/TUTORIAL.md) link.
