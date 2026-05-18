@@ -21,10 +21,10 @@ The labs are organized as [Google Cloud Shell Tutorials](https://docs.cloud.goog
 ### 👟 AI Gateway Foundations Lab
 
 In this lab you will:
-* Provision an **Apigee X** instance (either as Evaluation, Pay-as-you-go, or Subscription) in your chosen Google Cloud project and region using **Terraform**, using either the global or regional DRZ (US, EU, IN) control planes.
-* Deploy AI proxy templates in YAML format to models in your project's [Model Garden](https://cloud.google.com/model-garden) (Gemini, Claude, DeepSeek, Qwen, etc...).
+* Provision with **Terraform**, or just use an existing, **Apigee X** instance (either as Evaluation, Pay-as-you-go, or Subscription) in your chosen Google Cloud project and region, using either the **global** or **regional DRZ** (US, EU, IN) control planes.
+* Deploy **AI proxy YAML templates** to models in your project's [Model Garden](https://cloud.google.com/model-garden) (Gemini, Claude, DeepSeek, Qwen, etc...).
+* Create **AI Products** for Gemini, Claude, DeepSeek and Qwen models, add **authorization and governance** to the proxies, including allowed and failover models.
 * Use the AI Gateway as proxy in [Gemini CLI](https://geminicli.com/) and [Claude Code](https://claude.com/product/claude-code) for local CLI usage.
-* Test failover from an unapproved model to an approved, backup model.
 * View analytics usage of each model, for example counts of **prompt tokens**, **response tokens**, **time-to-first-token**, **latency**, etc...
 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://ssh.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/tyayers/apigee-aigateway-lab&cloudshell_git_branch=main&cloudshell_workspace=.&cloudshell_tutorial=TUTORIAL.md)
