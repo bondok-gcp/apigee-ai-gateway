@@ -1,6 +1,6 @@
-name: AI-Proxy-Gemini
+name: AI-Proxy-DeepSeek
 type: template
-description: API template for AI-Proxy-Gemini
+description: API template for AI-Proxy-DeepSeek
 features:
   - ai-auth
   - ai-proxy-agentplatform
@@ -9,14 +9,14 @@ parameters:
     paths:
       - $.endpoints[:1].basePath
     description: The base path to offer the AI proxy on.
-    default: /gemini
+    default: /deepseek
     examples:
       - /gemini
       - /llm
   - name: AllowedModelPatterns
     displayName: AllowedModelPatterns
     description: Configuration input for AllowedModelPatterns
-    default: gemini
+    default: deepseek
     examples:
       - google
       - anthropic

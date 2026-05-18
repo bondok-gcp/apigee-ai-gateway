@@ -62,7 +62,6 @@ If not already installed, install them into your shell.
 
 ```sh
 curl -L https://raw.githubusercontent.com/apigee/apigeecli/main/downloadLatest.sh | sh -
-
 npm i apigee-templater -g
 ```
 
@@ -114,17 +113,15 @@ source script_initialize.sh
 Now let's test if the Gemini API on [Gemini Enterprise Agent Platfrom](https://docs.cloud.google.com/gemini-enterprise-agent-platform) is working.
 
 ```sh
-curl -i -X POST "https://aiplatform.googleapis.com/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" \
--H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
--H "Content-Type: application/json" \
+curl -i -X POST "https://aiplatform.googleapis.com/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H "Content-Type: application/json" \
 -d '{"contents": [{"role": "USER", "parts": [{"text": "why is the sky blue?"}]}]}'
 ```
 
-You should get a response with an answer candidate with some text about 'Rayleigh scattering'. 
+You should get a response with an answer candidate with some text about **'Rayleigh scattering'**.
 
 ---
 
-## Deploy Gemini Proxy
+## Create Gemini Proxy
 
 Create a simple **AI-Gemini** proxy using the `aft` command with a base path of **/gemini** and deploying it to a proxy called **AI-Gemini** in your Apigee environment.
 
@@ -139,13 +136,11 @@ After the deployment is complete, click on the **Debug** tab in the proxy screen
 Let's now call the proxy URL with our same prompt, but this time see the request processing through our proxy in Apigee. Notice the **$APIGEE_HOST** parameter in the URL, which points the request to our Apigee endpoint.
 
 ```sh
-curl -i -X POST "https://$APIGEE_HOST/gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" \
--H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
--H "Content-Type: application/json" \
+curl -i -X POST "https://$APIGEE_HOST/gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H "Content-Type: application/json" \
 -d '{"contents": [{"role": "USER", "parts": [{"text": "why is the sky blue?"}]}]}'
 ```
 
-You should get a similar response again about 'Rayleigh scattering'. 
+You should get a similar response again about **'Rayleigh scattering'**. 
 
 Go back to the Debug panel, and see the processing steps, timings and variables that were done between the request and response.
 
@@ -159,8 +154,9 @@ Open the template file <walkthrough-editor-open-file filePath="AI-Proxy-Gemini.y
 
 ```sh
 aft AI-Proxy-Gemini.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT:ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com
+aft AI-Proxy-DeepSeek.yaml -o $GOOGLE_CLOUD_PROJECT:AI-DeepSeek:$APIGEE_ENVIRONMENT:ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com
+aft AI-Proxy-Qwen.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Qwen:$APIGEE_ENVIRONMENT:ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com
 aft AI-Proxy-Claude.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Claude:$APIGEE_ENVIRONMENT:ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com
-
 aft -i AI-Analytics.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Analytics:$APIGEE_ENVIRONMENT
 ```
 
@@ -176,23 +172,113 @@ source script_register_key.sh
 
 ## Test Model Proxy Authorization & Failover
 
+### Call Gemini Model
 Now let's call our model proxy with an API key as credential, that has subscribed to the **AI-Gemini** product with certain LLM token quotas.
 
 ```sh
-curl -i -X POST "https://$APIGEE_HOST/gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" \
--H "x-api-key: $API_KEY" \
--H "Content-Type: application/json" \
--d '{"contents": [{"role": "USER", "parts": [{"text": "why is the sky blue?"}]}]}'
+curl -i -X POST "https://$APIGEE_HOST/gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
+-d '{"model": "google/gemini-flash-latest", "stream": true, "messages":  [{"role": "user", "content": "Why is the sky blue?"}]}'
+```
+
+### Not Allowed Model
+In our Gemini proxy deployment, we set a model allowed flag to **gemini**, meaning we will reject any model names that don't contain that word. Let's try to kall **kimi-k2-thinking-maas** on our **/gemini** endpoint.
+
+```sh
+curl -i -X POST "https://$APIGEE_HOST/gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
+-d '{"model": "moonshotai/kimi-k2-thinking-maas", "stream": true, "messages":  [{"role": "user", "content": "What does the Orion constellation look like?"}]}'
+```
+
+You should get a **Model not allowed** response.
+
+### Model Failover
+Now let's do a call to a non-existent model to force a model failver to the configured failover model in the proxy, **gemini-flash-latest**.
+
+```sh
+curl -i -X POST "https://$APIGEE_HOST/gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
+-d '{"model": "google/gemini-5.1-pro", "stream": true, "messages":  [{"role": "user", "content": "What does the Orion constellation look like?"}]}'
+```
+
+You should get a response from **google/gemini-flash-latest** since the requested model failed.
+
+### Call some more models
+
+Let's call some more models.
+
+```sh
+curl -i -X POST "https://$APIGEE_HOST/deepseek/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
+-d '{"model": "deepseek-ai/deepseek-v3.2-maas", "stream": true, "messages":  [{"role": "user", "content": "What does the Orion constellation look like?"}]}'
+
+curl -i -X POST "https://$APIGEE_HOST/qwen/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
+-d '{"model": "qwen/qwen3-next-80b-a3b-thinking-maas", "stream": false, "messages":  [{"role": "user", "content": "What is a constellation in astronomy?"}]}'
+```
+
+Enable Anthropic models to call them through the **Claude** proxy.
+* [Claude Haiku 4.5](https://console.cloud.google.com/agent-platform/publishers/anthropic/model-garden/claude-haiku-4-5)
+* [Claude Sonnet 4.6](https://console.cloud.google.com/agent-platform/publishers/anthropic/model-garden/claude-sonnet-4-6)
+* [Claude Opus 4.6](https://console.cloud.google.com/agent-platform/publishers/anthropic/model-garden/claude-opus-4-6)
+* [Claude Opus 4.7](https://console.cloud.google.com/agent-platform/publishers/anthropic/model-garden/claude-opus-4-7)
+
+Call Claude Sonnet 4.6 through the **Claude** proxy.
+
+```sh
+curl -i -X POST "https://$APIGEE_HOST/claude/v1/projects/$PROJECT_ID/locations/global/publishers/anthropic/models/claude-sonnet-4-6:streamRawPredict" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
+-d '{"stream": true, "anthropic_version": "vertex-2023-10-16", "max_tokens": 100, "messages": [{"role": "user", "content": "What does the constellation Cassiopeia look like?"}]}'
+```
+
+## Test Gemini CLI and Claude Code with Apigee Proxies
+
+Show your **Apigee Host** and **API Key** to use in the CLI configurations.
+
+```sh
+echo $GOOGLE_CLOUD_PROJECT
+echo $APIGEE_HOST
+echo $API_KEY
+```
+
+Open your `~/.bashrc` and set these environment variables.
+
+```sh
+# Gemini
+export GOOGLE_VERTEX_BASE_URL=https://YOUR_APIGEE_HOST/gemini
+export GOOGLE_CLOUD_PROJECT=YOUR_GOOGLE_CLOUD_PROJECT
+export GOOGLE_CLOUD_LOCATION=global
+export GEMINI_CLI_CUSTOM_HEADERS="x-api-key: YOUR_API_KEY"
+
+# Anthropic
+export CLAUDE_CODE_USE_VERTEX=1
+export CLOUD_ML_REGION=global
+export ANTHROPIC_VERTEX_PROJECT_ID=YOUR_GOOGLE_CLOUD_PROJECT
+export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-7'
+export ANTHROPIC_DEFAULT_SONNET_MODEL='claude-sonnet-4-6'
+export ANTHROPIC_VERTEX_BASE_URL=https://YOUR_APIGEE_HOST/claude/v1
+export ANTHROPIC_CUSTOM_HEADERS="x-api-key: YOUR_API_KEY"
+```
+
+How use Gemini CLI and Claude Code (if installed) as you normally would, except now all of the model traffic is going through our Apigee proxies.
+
+```sh
+gemini -p "What does the constellation Leo look like? "
+gemini -p "What does the constellation Scorpio look like? "
 ```
 
 ## View Analytics Data
 
-TODO
+Start a local analytics dashboard to see the usage data.
+
+```sh
+go run .
+```
+
+Take a look at the <walkthrough-editor-open-file filePath="main.go">main.go</walkthrough-editor-open-file> file to see the server code.
+
+Click on the **[Web Preview 🖵](https://docs.cloud.google.com/shell/docs/using-web-preview)** button at the top of the **Cloud Shell** page to open the dashboard and see your analytics data. 
+
+Click on the **Demo Mode** slider at the top to see what the dashboard looks like with more data from a longer timeframe.
 
 ---
 
 ## Conclusion
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
 
-Congratulations! You've successfully deployed Apigee AI proxies into your Google Cloud project, as a next step try expanding the proxies to more models, product definitions, and tools such as API & MCP servers.
+Congratulations! You've successfully completed the **AI Gateway Foundations Lab** on Google Cloud. Keep an eye out for more AI Gateway Labs, and let us know what you think!
 <walkthrough-inline-feedback></walkthrough-inline-feedback>

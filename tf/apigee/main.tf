@@ -47,7 +47,8 @@ locals {
     "cloudkms.googleapis.com",
     "compute.googleapis.com",
     "servicenetworking.googleapis.com",
-    "aiplatform.googleapis.com"
+    "aiplatform.googleapis.com",
+    "cloudaicompanion.googleapis.com"
   ]
 
   network_id = (
