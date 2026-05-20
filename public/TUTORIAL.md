@@ -54,9 +54,8 @@ source .env
 ```
 
 ### Install tooling
-This lab uses two open source CLIs to automate Apigee, [apigeecli](https://github.com/apigee/apigeecli) and [aft](https://github.com/apigee/apigee-templater).
 
-If not already installed, install them into your shell.
+This lab uses two open source CLIs to automate Apigee, [apigeecli](https://github.com/apigee/apigeecli) and [aft](https://github.com/apigee/apigee-templater), run these commands to install:
 
 ```sh
 curl -L https://raw.githubusercontent.com/apigee/apigeecli/main/downloadLatest.sh | sh -
@@ -71,22 +70,17 @@ You can provision your Apigee instance in any of the ways documented [here](http
 
 If you already have Apigee provisioned, then you can skip this step.
 
-For a simple automated deployment, you can run the sample Terraform deployment in this lab, which also creates a load balancer and test certificate to access the instance.
+For a **simple, automated** deployment, run the [Terraform](https://developer.hashicorp.com/terraform) deployment in this lab, which provisions Apigee, a load balancer, certificate, and other needed services (all from the standard [Google provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs)).
 
 Take a look at the <walkthrough-editor-open-file filePath="tf/apigee/main.tf">main.tf</walkthrough-editor-open-file> file to see the resources created.
 
-To provision the lab sample Apigee instance, run these commands now.
-
-### Provision Resources
-
-The included Terraform template in this lab can easily provision all resources in an empty Google Cloud project with reasonable defaults (default network, Apigee evaluation, Model Garden, Load Balancer & Certificates, etc..).
-
-If you want to adjust the defaults, you can add these variables to the `apply` command below:
+These **optional parameters** can be added to the `apply` command to customize the deployment.
 * **--var "drz_location=$APIGEE_DRZ_LOCATION"**
 * **--var "apigee_type=$APIGEE_TYPE"**
 * **--var "network=$APIGEE_VPC_NAME"**
 * **--var "subnet=$APIGEE_SUBNET_NAME"`**
 
+Run these commands to provision:
 ```sh
 cd tf/apigee
 terraform init
@@ -94,7 +88,7 @@ terraform apply -var "project_id=$GOOGLE_CLOUD_PROJECT" -var "region=$GOOGLE_CLO
 cd ../..
 ```
 
-Provisioning takes around 20-30 minutes for Apigee, Model Garden, Load Balancer, Network Services, etc... to be deployed.
+Provisioning takes around 20-30 minutes for all services to be enabled & deployed.
 
 ---
 
