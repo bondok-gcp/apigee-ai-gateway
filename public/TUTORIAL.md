@@ -157,7 +157,7 @@ Now we will update the proxy with authorization, governance & analytics policies
 
 <img src="https://iili.io/C9und67.png" />
 
-The proxy definitions are YAML templates (open <walkthrough-editor-open-file filePath="AI-Proxy-Gemini.yaml">AI-Proxy-Gemini.yaml</walkthrough-editor-open-file> for an example), and see the [aft documentation](https://github.com/apigee/apigee-templater) for more information.
+The proxy definitions are YAML templates (see <walkthrough-editor-open-file filePath="AI-Proxy-Gemini.yaml">AI-Proxy-Gemini.yaml</walkthrough-editor-open-file> for an example), and see the [aft documentation](https://github.com/apigee/apigee-templater) for more information.
 
 Deploy the templates:
 
@@ -182,6 +182,9 @@ source script_register_key.sh
 ## Test Model Proxy Authorization & Failover
 
 ### Call Gemini Model
+
+<img src="https://iili.io/C9ATbmF.png" />
+
 Now let's call our model proxy with an API key as credential, that has subscribed to the **AI-Gemini** product with certain LLM token quotas. You can start a debug session again in the Apigee console if you wish to see the processing steps.
 
 ```sh
