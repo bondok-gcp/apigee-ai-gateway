@@ -38,15 +38,16 @@ Additionally these **optional** variables can be set if you want to use an exist
 * **APIGEE_SUBNET_NAME**: The name of your existing VPC subnet to use for Apigee
 * **APIGEE_DRZ_LOCATION**: The optional DRZ data residency location for Apigee data (US, EU or IN)
 
-To set these, first copy the `env.sh` file to a local `.env` file.
+### Set environment variables
+1. Copy the `env.sh` file to a local `.env` file by running this command.
 
 ```sh
 cp env.sh .env
 ```
 
-Click  <walkthrough-editor-open-file filePath=".env">here</walkthrough-editor-open-file> to open the `.env` file in the editor.
+2. Click  <walkthrough-editor-open-file filePath=".env">here</walkthrough-editor-open-file> to open the `.env` file in the editor.
 
-Set your values, save the file, and then run `source .env`.
+3. After saving your changes, load the variables.
 
 ```sh
 source .env
