@@ -314,7 +314,7 @@ Click on the **Demo Mode** slider at the top to see what the dashboard looks lik
 
 <img src="https://iili.io/C9AFb2a.png" />
 
-You can also use [Google Data Studio](https://datastudio.google.com/) to design Apigee AI dashboards, take a look at this [template](https://datastudio.google.com/s/nqey8Stz8rs), and as a bonus try cloning it and creating your own using the [Apigee Data Source](https://docs.cloud.google.com/apigee/docs/api-platform/analytics/data-studio).
+You can also use [Google Data Studio](https://datastudio.google.com/) to design Apigee AI dashboards. Take a look at this [template](https://datastudio.google.com/s/nqey8Stz8rs), and as a bonus try copying it and creating your own using the [Apigee Data Source](https://docs.cloud.google.com/apigee/docs/api-platform/analytics/data-studio).
 
 ---
 
