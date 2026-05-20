@@ -58,7 +58,6 @@ source .env
 This lab uses two open source CLIs to automate Apigee, [apigeecli](https://github.com/apigee/apigeecli) and [aft](https://github.com/apigee/apigee-templater), run these commands to install:
 
 ```sh
-
 curl -L https://raw.githubusercontent.com/apigee/apigeecli/main/downloadLatest.sh | sh -
 npm i apigee-templater -g
 ```
@@ -95,10 +94,11 @@ Provisioning takes around 20-30 minutes for all services to be enabled & deploye
 
 ## Initialize environment
 
-After provisioning is finished, let's initialize some Apigee environment variables and create the analytics data collectors for AI proxies.
+After provisioning is finished, let's initialize the environment, enable Model Garden and other services, and create a service account to access our AI models.
 
 Take a look at the <walkthrough-editor-open-file filePath="script_initialize.sh">script_initialize.sh</walkthrough-editor-open-file> file to see the commands that are run.
 
+Run this command to initialize the environment:
 ```sh
 source script_initialize.sh
 ```
@@ -108,6 +108,20 @@ source script_initialize.sh
 ## Test Gemini API
 
 Now let's test if the Gemini API on [Gemini Enterprise Agent Platfrom](https://docs.cloud.google.com/gemini-enterprise-agent-platform) is working.
+
+```mermaid
+%% Example of sequence diagram
+  sequenceDiagram
+    Alice->>Bob: Hello Bob, how are you?
+    alt is sick
+    Bob->>Alice: Not so good :(
+    else is well
+    Bob->>Alice: Feeling fresh like a daisy
+    end
+    opt Extra response
+    Bob->>Alice: Thanks for asking
+    end
+```
 
 ```sh
 curl -i -X POST "https://aiplatform.googleapis.com/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H "Content-Type: application/json" \
@@ -120,13 +134,13 @@ You should get a response with an answer candidate with some text about **'Rayle
 
 ## Create Gemini Proxy
 
-Create a simple **AI-Gemini** proxy using the `aft` command with a base path of **/gemini** and deploying it to a proxy called **AI-Gemini** in your Apigee environment.
+Let's create a simple **AI-Gemini** proxy using the `aft` command with a base path of **/gemini** and deploying it to a proxy called **AI-Gemini** in your Apigee environment.
 
 ```sh
 aft -b /gemini -u https://aiplatform.googleapis.com -o $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT
 ```
 
-Open the proxy in the [Google Cloud Console](https://console.cloud.google.com/apigee/proxies/AI-Gemini/overview), and wait until the deployment is complete (you should see a gree ✅ next to the deployment).
+Open the proxy in the [Google Cloud Console](https://console.cloud.google.com/apigee/proxies/AI-Gemini/overview), and wait until the deployment is complete (you should see a green ✅ next to the deployment).
 
 After the deployment is complete, click on the **Debug** tab in the proxy screen, and start a debug session.
 
