@@ -153,7 +153,13 @@ Go back to the Debug panel, and see the processing steps, timings and variables 
 
 ## Add Model Authorization, Governance & Analytics
 
-Now we will update the proxy for **Gemini**, and also add more proxies for further models. These proxies are based on YAML proxy templates (open <walkthrough-editor-open-file filePath="AI-Proxy-Gemini.yaml">AI-Proxy-Gemini.yaml</walkthrough-editor-open-file> for an example), and see the [aft documentation](https://github.com/apigee/apigee-templater) for more information.
+Now we will update the proxy with authorization, governance & analytics policies, as well as add proxies to more models.
+
+<img src="https://iili.io/C9und67.png" />
+
+The proxy definitions are YAML templates (open <walkthrough-editor-open-file filePath="AI-Proxy-Gemini.yaml">AI-Proxy-Gemini.yaml</walkthrough-editor-open-file> for an example), and see the [aft documentation](https://github.com/apigee/apigee-templater) for more information.
+
+Deploy the templates:
 
 ```sh
 aft AI-Proxy-Gemini.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT:ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com
@@ -165,7 +171,7 @@ aft -i AI-Analytics.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Analytics:$APIGEE_ENVIRONME
 
 Now let's create a **product** & **subscription** to the **AI-Gemini** proxy. [Products](https://docs.cloud.google.com/apigee/docs/api-platform/publish/what-api-product) and [Subscriptions](https://docs.cloud.google.com/apigee/docs/api-platform/publish/creating-apps-surface-your-api) allow user authorization and detailed quotas on things like number of tokens, calls or specific models, paths or operations.
 
-Take a look at the <walkthrough-editor-open-file filePath="script_register_key.sh">script_register_key.sh</walkthrough-editor-open-file> file to see the commands that are run.
+Take a look at the <walkthrough-editor-open-file filePath="script_register_key.sh">script_register_key.sh</walkthrough-editor-open-file> file, and then run the commands:
 
 ```sh
 source script_register_key.sh
