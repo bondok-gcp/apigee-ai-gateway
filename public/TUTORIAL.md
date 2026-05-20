@@ -20,28 +20,25 @@ These [Google Cloud roles](https://docs.cloud.google.com/iam/docs/roles-permissi
 * Compute Network Admin (roles/compute.networkAdmin)
 * Cloud KMS Admin (roles/cloudkms.admin)
 * Agent Platform Admin (roles/ml.admin)
+* Project IAM Admin (roles/resourcemanager.projectIamAdmin)
 
 ---
 
 ## Setup
 
-You will need to set these environment variables to run this lab.
+You will need to set these environment variables to run this lab:
 
-| Variable | Description |
-| -------- | ----------- |
-| GOOGLE_CLOUD_PROJECT | Your Google Cloud project id |
-| GOOGLE_CLOUD_LOCATION | Your Google Cloud region for the Apigee region |
-| APIGEE_TYPE | The type of Apigee deployment (either EVALUATION (valid for 60 days), PAYG (consumption pricing, path to production), or SUBSCRIPTION (fixed pricing)) |
+* **GOOGLE_CLOUD_PROJECT**: Your Google Cloud project id
+* **GOOGLE_CLOUD_LOCATION**: Your Google Cloud region for the Apigee region
+* **APIGEE_TYPE**: The type of Apigee deployment (either EVALUATION (valid for 60 days), PAYG (consumption pricing, path to production), or SUBSCRIPTION (fixed pricing)) |
 
-Additionally these optional variables can be set if you want to use an existing VPC and subnet, or use a DRZ data residency location.
+Additionally these **optional** variables can be set if you want to use an existing VPC and subnet, or use a DRZ data residency location:
 
-| Optional Variable | Description |
-| -------- | ----------- |
-| APIGEE_VPC_NAME | The name of your existing VPC to use for Apigee |
-| APIGEE_SUBNET_NAME | The name of your existing VPC subnet to use for Apigee |
-| APIGEE_DRZ_LOCATION | The optional DRZ data residency location for Apigee data (US, EU or IN) |
+* **APIGEE_VPC_NAME**: The name of your existing VPC to use for Apigee
+* **APIGEE_SUBNET_NAME**: The name of your existing VPC subnet to use for Apigee
+* **APIGEE_DRZ_LOCATION**: The optional DRZ data residency location for Apigee data (US, EU or IN)
 
-To set these, you can easily copy the `env.sh` file to a local `.env` file.
+To set these, first copy the `env.sh` file to a local `.env` file.
 
 ```sh
 cp env.sh .env
@@ -49,7 +46,7 @@ cp env.sh .env
 
 Click  <walkthrough-editor-open-file filePath=".env">here</walkthrough-editor-open-file> to open the `.env` file in the editor.
 
-Set your values, save the file, and then run the `source .env`.
+Set your values, save the file, and then run `source .env`.
 
 ```sh
 source .env
@@ -67,23 +64,27 @@ npm i apigee-templater -g
 
 ---
 
-## Provision Apigee
+## Configure Apigee
 
 You can provision your Apigee instance in any of the ways documented [here](https://docs.cloud.google.com/apigee/docs/api-platform/get-started/provisioning-options).
 
 If you already have Apigee provisioned, then you can skip this step.
 
-For a simple automated deployment, we can run the sample Terraform deployment in this lab, which also creates a load balancer and test certificate to access the instance.
+For a simple automated deployment, you can run the sample Terraform deployment in this lab, which also creates a load balancer and test certificate to access the instance.
 
 Take a look at the <walkthrough-editor-open-file filePath="tf/apigee/main.tf">main.tf</walkthrough-editor-open-file> file to see the resources created.
 
 To provision the lab sample Apigee instance, run these commands now.
 
-### Provision resources
+### Provision Resources
 
 The included Terraform template in this lab can easily provision all resources in an empty Google Cloud project with reasonable defaults (default network, Apigee evaluation, Model Garden, Load Balancer & Certificates, etc..).
 
-If you want to adjust the defaults, you can add these variables to the `apply` command below: ` --var "drz_location=$APIGEE_DRZ_LOCATION" --var "apigee_type=$APIGEE_TYPE" --var "network=$APIGEE_VPC_NAME" --var "subnet=$APIGEE_SUBNET_NAME"`.
+If you want to adjust the defaults, you can add these variables to the `apply` command below:
+* **--var "drz_location=$APIGEE_DRZ_LOCATION"**
+* **--var "apigee_type=$APIGEE_TYPE"**
+* **--var "network=$APIGEE_VPC_NAME"**
+* **--var "subnet=$APIGEE_SUBNET_NAME"`**
 
 ```sh
 cd tf/apigee

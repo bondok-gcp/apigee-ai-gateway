@@ -7,9 +7,11 @@ apigeecli datacollectors create -d "Total token count" -n dc_ai_response_token_c
 apigeecli datacollectors create -d "Model response type" -n dc_ai_response_type -p STRING --org "$GOOGLE_CLOUD_PROJECT" --default-token
 apigeecli datacollectors create -d "Time to first token" -n dc_ai_time_first_token -p INTEGER --org "$GOOGLE_CLOUD_PROJECT" --default-token
 
-# create AI service account
+# enable APIs and create AI service account
 gcloud services enable aiplatform.googleapis.com --project $GOOGLE_CLOUD_PROJECT
 gcloud services enable cloudaicompanion.googleapis.com --project $GOOGLE_CLOUD_PROJECT
+gcloud services enable modelarmor.googleapis.com --project $GOOGLE_CLOUD_PROJECT
+gcloud services enable dlp.googleapis.com --project $GOOGLE_CLOUD_PROJECT
 gcloud iam service-accounts create "ai-service" --project="$GOOGLE_CLOUD_PROJECT" \
     --description="AI service account" \
     --display-name="AI Service Account"
@@ -18,6 +20,12 @@ sleep 5
 gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
     --member="serviceAccount:ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com" \
     --role="roles/aiplatform.user"
+gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+    --member="serviceAccount:ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com" \
+    --role="roles/apigee.viewer"
+gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+    --member="serviceAccount:ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com" \
+    --role="roles/modelarmor.user"
 gcloud iam service-accounts add-iam-policy-binding \
   ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com \
   --member="user:$(gcloud config get-value account 2>/dev/null)" \

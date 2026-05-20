@@ -43,7 +43,9 @@ locals {
     "compute.googleapis.com",
     "servicenetworking.googleapis.com",
     "aiplatform.googleapis.com",
-    "cloudaicompanion.googleapis.com"
+    "cloudaicompanion.googleapis.com",
+    "modelarmor.googleapis.com",
+    "dlp.googleapis.com"
   ]
 
   network_id = (
