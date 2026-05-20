@@ -182,7 +182,7 @@ source script_register_key.sh
 ## Test Model Proxy Authorization & Failover
 
 ### Call Gemini Model
-Now let's call our model proxy with an API key as credential, that has subscribed to the **AI-Gemini** product with certain LLM token quotas.
+Now let's call our model proxy with an API key as credential, that has subscribed to the **AI-Gemini** product with certain LLM token quotas. You can start a debug session again in the Apigee console if you wish to see the processing steps.
 
 ```sh
 curl -i -X POST "https://$APIGEE_HOST/gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
@@ -190,17 +190,23 @@ curl -i -X POST "https://$APIGEE_HOST/gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJ
 ```
 
 ### Not Allowed Model
-In our Gemini proxy deployment, we set a model allowed flag to **gemini**, meaning we will reject any model names that don't contain that word. Let's try to kall **kimi-k2-thinking-maas** on our **/gemini** endpoint.
+
+<img src="https://iili.io/C9ujkXf.png" />
+  
+In our Gemini proxy deployment, we set a model allowed flag to **gemini**, so let's try calling another model on our endpoint, and see if it's rejected:
 
 ```sh
 curl -i -X POST "https://$APIGEE_HOST/gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
--d '{"model": "moonshotai/kimi-k2-thinking-maas", "stream": true, "messages":  [{"role": "user", "content": "What does the Orion constellation look like?"}]}'
+-d '{"model": "aistartup/coolmodel33", "stream": true, "messages":  [{"role": "user", "content": "What does the Orion constellation look like?"}]}'
 ```
 
 You should get a **Model not allowed** response.
 
 ### Model Failover
-Now let's do a call to a non-existent model to force a model failver to the configured failover model in the proxy, **gemini-flash-latest**.
+
+<img src="https://iili.io/C9ujvs4.png" />
+
+Now let's do a call to a non-existent Gemini model, and force a model failver to the configured failover model in the proxy, **gemini-flash-latest**.
 
 ```sh
 curl -i -X POST "https://$APIGEE_HOST/gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
@@ -210,6 +216,8 @@ curl -i -X POST "https://$APIGEE_HOST/gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJ
 You should get a response from **google/gemini-flash-latest** since the requested model failed.
 
 ### Call some more models
+
+<img src="https://iili.io/C9ujNbs.png" />
 
 Let's call some more models.
 
@@ -234,6 +242,8 @@ curl -i -X POST "https://$APIGEE_HOST/claude/v1/projects/$PROJECT_ID/locations/g
 -d '{"stream": true, "anthropic_version": "vertex-2023-10-16", "max_tokens": 100, "messages": [{"role": "user", "content": "What does the constellation Cassiopeia look like?"}]}'
 ```
 
+---
+
 ## Test Gemini CLI and Claude Code with Apigee Proxies
 
 Show your **Apigee Host** and **API Key** to use in the CLI configurations.
@@ -244,7 +254,13 @@ echo $APIGEE_HOST
 echo $API_KEY
 ```
 
-Open your `~/.bashrc` and set these environment variables.
+1. Open your `~/.bashrc` to edit with this command:
+
+```sh
+nano ~/.bashrc
+```
+
+2. **Add these environment variables with your data:**
 
 ```sh
 # Gemini
@@ -269,6 +285,8 @@ How use Gemini CLI and Claude Code (if installed) as you normally would, except 
 gemini -p "What does the constellation Leo look like? "
 gemini -p "What does the constellation Scorpio look like? "
 ```
+
+Install Claude Code and test in the same way.
 
 ## View Analytics Data
 
