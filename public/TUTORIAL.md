@@ -43,22 +43,23 @@ Additionally these **optional** variables can be set if you want to use an exist
 * **APIGEE_SUBNET_NAME**: The name of your existing VPC subnet to use for Apigee
 * **APIGEE_DRZ_LOCATION**: The optional DRZ data residency location for Apigee data (US, EU or IN)
 
-### Set environment variables
-1. Copy the `./sh/env.sh` file to a local `.env` file by running this command.
+### Set Environment Variables
+
+1. **Copy** the `./sh/env.sh` file to a local `.env` file by running this command.
 
 ```sh
 cp ./sh/env.sh .env
 ```
 
-2. Click  <walkthrough-editor-open-file filePath=".env">here</walkthrough-editor-open-file> to open the `.env` file in the editor.
+2. **Click**  <walkthrough-editor-open-file filePath=".env">here</walkthrough-editor-open-file> to open the `.env` file in the editor.
 
-3. After saving your changes, load the variables.
+3. After **saving** your changes, load the variables by running this command:
 
 ```sh
 source .env
 ```
 
-### Install tooling
+### Install Tooling
 
 <img src="https://iili.io/C9AvqyN.png" />
 
@@ -101,7 +102,7 @@ Provisioning takes around 20-30 minutes for all services to be enabled & deploye
 
 ---
 
-## Initialize environment
+## Initialize Environment
 
 <img src="https://iili.io/C9AvqyN.png" />
 
@@ -229,7 +230,7 @@ curl -i -X POST "https://$APIGEE_HOST/gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJ
 
 You should get a response from **google/gemini-flash-latest** since the requested model failed.
 
-### Call some more models
+### Call More Models
 
 <img src="https://iili.io/C9ujNbs.png" />
 

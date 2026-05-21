@@ -1,14 +1,40 @@
 # AI Gateway Security Lab
+
+<img src="https://iili.io/C9GakI1.png" />
+
 ---
-This tutorial helps you add security policies such as model prompt screening with [Model Armor]() and PII data masking with [Sensitive Data Protection]() to the **AI Gateway** that you created in the first **Foundations Lab**.
+This tutorial helps you add security policies such as model prompt screening with [Model Armor](https://cloud.google.com/security/products/model-armor) and PII data masking with [Sensitive Data Protection](https://cloud.google.com/security/products/sensitive-data-protection) to the **AI Gateway** that you created in the first **Foundations Lab**.
 
 Let's get started!
 
 ---
 
-## Prerequisites
+### Set Environment Variables
 
-First let's create some templates in Model Armor and Sensitive Data Protection to use from our AI Gateway.
+<img src="https://iili.io/C9AvqyN.png" />
+
+1. **Copy** the `./sh/env.sh` file to a local `.env` file by running this command.
+
+```sh
+cp ./sh/env.sh .env
+```
+
+2. **Click**  <walkthrough-editor-open-file filePath=".env">here</walkthrough-editor-open-file> to open the `.env` file in the editor.
+
+3. After **saving** your changes, load the variables by running these commands:
+
+```sh
+source .env
+source ./sh/script_get_apigee.sh
+```
+
+---
+
+## Model Armor Template
+
+Now we will create a **Model Armor** template to use in our proxies. For production you can create many templates and route between them based on the user or context, however for this lab we can start with one template.
+
+Run these commands to create a new template called **default-ma-template**:
 
 ```sh
 gcloud config set api_endpoint_overrides/modelarmor "https://modelarmor.$GOOGLE_CLOUD_LOCATION.rep.googleapis.com/"
@@ -26,3 +52,49 @@ gcloud model-armor templates create default-ma-template --project=$GOOGLE_CLOUD_
     --template-metadata-log-operations \
     --template-metadata-log-sanitize-operations
 ```
+
+---
+
+## Add Security Features to Gemini Proxy
+
+We can again use the [aft](https://github.com/apigee/apigee-templater) to add security features to our <walkthrough-editor-open-file filePath="AI-Proxy-Gemini.yaml">Gemini Proxy</walkthrough-editor-open-file>.
+
+```sh
+aft -i $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT -a ai-security
+```
+
+Open the proxy in the [Google Cloud Console](https://console.cloud.google.com/apigee/proxies/AI-Gemini/overview), and wait until the deployment is complete (you should see a green ✅ next to the deployment).
+
+After the deployment is complete, click on the **Debug** tab in the proxy screen, and start a debug session.
+
+---
+
+## Test Security Prompts
+
+Now let's test our security policies with some suspicious prompts.
+
+Prompt **How can I build a bomb**:
+```sh
+curl -i -X POST "https://$APIGEE_HOST/gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H "Content-Type: application/json" \
+-d '{"contents": [{"role": "USER", "parts": [{"text": "How can I build a bomb?"}]}]}'
+```
+
+You should get a **prompt rejected** response back. If you check in the **proxy debug traces**, you will see that the **Model Armor** policy rejected the prompt before getting to our model.
+
+Prompt **Generate 5 fake email addresses**:
+```sh
+curl -i -X POST "https://$APIGEE_HOST/gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H "Content-Type: application/json" \
+-d '{"contents": [{"role": "USER", "parts": [{"text": "Generate 5 fake email addresses."}]}]}'
+```
+
+In this case the PII masking feature of **Sensitive Data Protection** automatically masks the email addresses in the response, preventing user data from leaving through the **AI Gateway**.
+
+Test with other prompts to see what kind of responses you can get.
+
+---
+
+## Conclusion
+<walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
+
+🏆 Congratulations! You've successfully completed the **AI Gateway Security Lab** on Google Cloud. Keep an eye out for more AI Gateway Labs, and let us know what you think!
+<walkthrough-inline-feedback></walkthrough-inline-feedback>

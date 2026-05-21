@@ -18,7 +18,7 @@ To run these labs you will need:
 
 The labs are organized as [Google Cloud Shell Tutorials](https://docs.cloud.google.com/shell/docs/cloud-shell-tutorials/tutorials), and can run interactively in your own project.
 
-### 👟 AI Gateway Foundations Lab
+### 👟 AI Gateway Foundations Lab (⏱ 30-60 min)
 
 In this lab you will:
 * Provision with **Terraform**, or just use an existing, **Apigee X** instance (either as Evaluation, Pay-as-you-go, or Subscription) in your chosen Google Cloud project and region, using either the **global** or **regional DRZ** (US, EU, IN) control planes.
@@ -33,7 +33,7 @@ Direct [markdown](https://github.com/tyayers/ai-gateway-labs/blob/main/public/TU
 
 ---
 
-### 🔐 AI Gateway Security Lab
+### 🔐 AI Gateway Security Lab (⏱ 15-30 min)
 
 In this lab you will:
 * Create a **Model Armor** template and add it to our AI proxies.
@@ -47,7 +47,7 @@ Direct [markdown](https://github.com/tyayers/ai-gateway-labs/blob/main/public/TU
 
 ---
 
-### 🛠 AI Gateway Tools Lab
+### 🛠 AI Gateway Tools Lab (⏱ 15-30 min)
 
 In this lab you will:
 * Create **MCP proxies** to existing GCP MCP endpoints in your Google Cloud project, such as BigQuery.  
