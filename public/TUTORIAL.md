@@ -44,10 +44,10 @@ Additionally these **optional** variables can be set if you want to use an exist
 * **APIGEE_DRZ_LOCATION**: The optional DRZ data residency location for Apigee data (US, EU or IN)
 
 ### Set environment variables
-1. Copy the `env.sh` file to a local `.env` file by running this command.
+1. Copy the `./sh/env.sh` file to a local `.env` file by running this command.
 
 ```sh
-cp env.sh .env
+cp ./sh/env.sh .env
 ```
 
 2. Click  <walkthrough-editor-open-file filePath=".env">here</walkthrough-editor-open-file> to open the `.env` file in the editor.
