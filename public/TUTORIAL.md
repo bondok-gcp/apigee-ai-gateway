@@ -3,7 +3,7 @@
 <img src="https://iili.io/C9Al3Ol.jpg" />
 
 ---
-This tutorial helps you to provision an AI Gateway into your Google Cloud project, and create AI proxies to add **governance & analytics** to agentic tooling like **Gemini CLI**, **Claude Code**, as well as any other agents or apps using AI in the organization.
+This tutorial guides you through provisioning an **AI Gateway** in your Google Cloud project, and then creating AI proxies to add **governance & analytics** at the gateway level to agentic tools like **Gemini CLI**, **Claude Code**, or any other AI application.
 
 Let's get started!
 
@@ -107,11 +107,11 @@ Provisioning takes around 20-30 minutes for all services to be enabled & deploye
 
 After provisioning is finished, let's initialize the Apigee environment, enable Model Garden and other services, and create a service account to access our AI models.
 
-Take a look at the <walkthrough-editor-open-file filePath="script_initialize.sh">script_initialize.sh</walkthrough-editor-open-file> file to see the commands that are run.
+Take a look at the <walkthrough-editor-open-file filePath="./sh/script_initialize.sh">script_initialize.sh</walkthrough-editor-open-file> file to see the commands that are run.
 
 Run this command to initialize the environment:
 ```sh
-source script_initialize.sh
+source ./sh/script_initialize.sh
 ```
 
 ---
@@ -182,10 +182,10 @@ aft -i AI-Analytics.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Analytics:$APIGEE_ENVIRONME
 
 Now let's create a **product** & **subscription** to the **AI-Gemini** proxy. [Products](https://docs.cloud.google.com/apigee/docs/api-platform/publish/what-api-product) and [Subscriptions](https://docs.cloud.google.com/apigee/docs/api-platform/publish/creating-apps-surface-your-api) allow user authorization and detailed quotas on things like number of tokens, calls or specific models, paths or operations.
 
-Take a look at the <walkthrough-editor-open-file filePath="script_register_key.sh">script_register_key.sh</walkthrough-editor-open-file> file, and then run the commands:
+Take a look at the <walkthrough-editor-open-file filePath="./sh/script_register_key.sh">script_register_key.sh</walkthrough-editor-open-file> file, and then run the commands:
 
 ```sh
-source script_register_key.sh
+source ./sh/script_register_key.sh
 ```
 
 ---

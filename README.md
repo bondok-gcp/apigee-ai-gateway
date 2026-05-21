@@ -30,3 +30,27 @@ In this lab you will:
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://ssh.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/tyayers/apigee-aigateway-lab&cloudshell_git_branch=main&cloudshell_workspace=.&cloudshell_tutorial=public/TUTORIAL.md)
 
 Direct [markdown](https://github.com/tyayers/ai-gateway-labs/blob/main/public/TUTORIAL.md) link.
+
+### 🔐 AI Gateway Security Lab
+
+In this lab you will:
+* Create a **Model Armor** template and add it to our AI proxies.
+* Add **Sensitive Data Protection** PII data masking feature to our AI proxies.
+* Test the AI proxy endpoints with malicious prompts.
+* Test the AI proxy endpoints with PII personal data.
+
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://ssh.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/tyayers/apigee-aigateway-lab&cloudshell_git_branch=main&cloudshell_workspace=.&cloudshell_tutorial=public/TUTORIAL_SECURITY.md)
+
+Direct [markdown](https://github.com/tyayers/ai-gateway-labs/blob/main/public/TUTORIAL_SECURITY.md) link.
+
+### 🛠 AI Gateway Tools Lab
+
+In this lab you will:
+* Create **MCP proxies** to existing GCP MCP endpoints in your Google Cloud project, such as BigQuery.  
+* Add **tool filters** to only grant access to certain tools through Product rules.  
+* Create a **REST-MCP translation proxy** to convert an existing REST endpoint to MCP.  
+* Observe MCP tool access in analytics and logs.
+
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://ssh.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/tyayers/apigee-aigateway-lab&cloudshell_git_branch=main&cloudshell_workspace=.&cloudshell_tutorial=public/TUTORIAL_TOOLS.md)
+
+Direct [markdown](https://github.com/tyayers/ai-gateway-labs/blob/main/public/TUTORIAL_TOOLS.md) link.

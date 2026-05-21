@@ -1,6 +1,6 @@
 # AI Gateway Security Lab
 ---
-This tutorial helps you add security policies such as model prompt screening with [Model Armor]() and PII data masking with [Sensitive Data Protection]() to the **AI Gateway** that you created in the first **Foundations Lab**
+This tutorial helps you add security policies such as model prompt screening with [Model Armor]() and PII data masking with [Sensitive Data Protection]() to the **AI Gateway** that you created in the first **Foundations Lab**.
 
 Let's get started!
 
