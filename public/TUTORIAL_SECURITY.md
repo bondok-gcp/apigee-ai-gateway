@@ -2,12 +2,9 @@
 
 <img src="https://iili.io/C9GakI1.png" />
 
----
 This tutorial helps you add security policies such as model prompt screening with [Model Armor](https://cloud.google.com/security/products/model-armor) and PII data masking with [Sensitive Data Protection](https://cloud.google.com/security/products/sensitive-data-protection) to the **AI Gateway** that you created in the first **Foundations Lab**.
 
 Let's get started!
-
----
 
 ## Set Up Environment
 
@@ -65,7 +62,7 @@ gcloud model-armor templates create default-ma-template --project=$GOOGLE_CLOUD_
 
 ## Add Security Features to Gemini Proxy
 
-We can again use the [aft](https://github.com/apigee/apigee-templater) to add security features (by default [**Model Armor**](https://cloud.google.com/security/products/model-armor) and [**SDP De-Identity**](https://cloud.google.com/security/products/sensitive-data-protection)) to our <walkthrough-editor-open-file filePath="AI-Proxy-Gemini.yaml">Gemini Proxy</walkthrough-editor-open-file>.
+We can again use the [aft](https://github.com/apigee/apigee-templater) to add security features (by default [**Model Armor**](https://cloud.google.com/security/products/model-armor) and [**SDP De-Identity**](https://cloud.google.com/security/products/sensitive-data-protection)) to the <walkthrough-editor-open-file filePath="AI-Proxy-Gemini.yaml">AI-Gemini Proxy</walkthrough-editor-open-file>.
 
 ```sh
 aft -i $GOOGLE_CLOUD_PROJECT:AI-Gemini -a ai-security
