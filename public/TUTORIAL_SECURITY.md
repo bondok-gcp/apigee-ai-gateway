@@ -9,8 +9,7 @@ Let's get started!
 
 ---
 
-
-## Set Environment Variables and Tooling
+## Set Up Environment
 
 <img src="https://iili.io/C9AvqyN.png" />
 
@@ -36,6 +35,7 @@ Just in case they are no longer installed:
 curl -L https://raw.githubusercontent.com/apigee/apigeecli/main/downloadLatest.sh | sh -
 npm i apigee-templater -g
 ```
+
 ___
 
 ## Model Armor Template
