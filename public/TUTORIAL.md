@@ -145,7 +145,7 @@ aft -b /gemini -u https://aiplatform.googleapis.com -o $GOOGLE_CLOUD_PROJECT:AI-
 
 Open the proxy in the [Google Cloud Console](https://console.cloud.google.com/apigee/proxies/AI-Gemini/overview), and wait until the deployment is complete (you should see a green ✅ next to the deployment).
 
-![Gemini proxy deploy](https://amalbagee.web.app/apigee/ai-gemini-deploy1.png)
+[![Gemini proxy deploy](https://amalbagee.web.app/apigee/ai-gemini-deploy1.png)](https://amalbagee.web.app/apigee/ai-gemini-deploy1.png)
 
 After the deployment is complete, click on the **Debug** tab in the proxy screen, and start a debug session.
 
