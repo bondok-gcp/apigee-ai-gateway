@@ -274,15 +274,9 @@ export GOOGLE_VERTEX_BASE_URL="https://$APIGEE_HOST/gemini"
 export GEMINI_CLI_CUSTOM_HEADERS="x-api-key: $API_KEY"
 ```
 
-Show your **Apigee Host** and **API Key** to use in the CLI configurations.
-
-```sh
-echo $GOOGLE_CLOUD_PROJECT
-echo $APIGEE_HOST
-echo $API_KEY
-```
-
 Start a **debug session** in the Apigee console again, and use **Gemini CLI** to answer some questions. Feel free to ask additional prompts, or start the full tool.
+
+![Gemini CLI](https://amalbagee.web.app/gemini/gemini-cli1.png)
 
 ```sh
 gemini -p "What does the constellation Leo look like? "
