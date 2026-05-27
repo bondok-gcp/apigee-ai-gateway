@@ -9,7 +9,7 @@ Let's get started!
 
 ---
 
-### Set Environment Variables
+## Set Environment Variables
 
 <img src="https://iili.io/C9AvqyN.png" />
 
