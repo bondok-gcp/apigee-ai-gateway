@@ -37,7 +37,7 @@ npm i apigee-templater -g
 
 ## Provision API Hub (if not already provisioned)
 
-![API Hub](https://amalbagee.web.app/apigee/apihub1.png)
+[![API Hub](https://amalbagee.web.app/apigee/apihub1.png)](https://amalbagee.web.app/apigee/apihub1.png)
 
 [Apigee API Hub](https://docs.cloud.google.com/apigee/docs/apihub/what-is-api-hub) is a universal repository for any type of API, and so will be used in this lab to manage and store the AI tools' metadata and schemas.
 
@@ -52,3 +52,5 @@ source ./sh/script_hub_init.sh
 ```
 
 Provisioning usually takes 10-15 minutes.
+
+## 
