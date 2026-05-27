@@ -31,10 +31,11 @@ curl -X POST "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJE
 EOF
 
 # create app and get key
-export API_KEY=$(curl -X POST "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJECT/developers/test@example.com/apps" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H 'Content-Type: application/json; charset=utf-8' \
---data-binary @- << EOF | jq --raw-output '.credentials[0].consumerKey')
+export API_KEY=$(curl -X POST "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJECT/developers/${UNIQUE_NAME,,}-test@example.com/apps" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H 'Content-Type: application/json; charset=utf-8' \
+--data-binary @- << EOF | jq --raw-output '.credentials[0].consumerKey'
 
 {"developerId": "${UNIQUE_NAME,,}-test@example.com", "name": "AI $UNIQUE_NAME App", "apiProducts": ["Gemini $UNIQUE_NAME Product","DeepSeek $UNIQUE_NAME Product","Qwen $UNIQUE_NAME Product","Claude $UNIQUE_NAME Product"]}
 EOF
+)
 
 echo "Your API key to access the Gemini Product is: $API_KEY"

@@ -167,7 +167,7 @@ func refreshAnalyticsData(projectId string) error {
 	envUrl := fmt.Sprintf("https://apigee.googleapis.com/v1/organizations/%s/environments", projectId)
 	var envs []string
 	if err := doApigeeRequest(ctx, "GET", envUrl, nil, &envs); err != nil {
-		return fmt.Errorf("failed to get environments for org %s: %v", projectId, err)
+		log.Printf("failed to get environments for org %s: %v", projectId, err)
 	}
 
 	// Determine the list of emails to query
@@ -179,7 +179,7 @@ func refreshAnalyticsData(projectId string) error {
 		} `json:"developer"`
 	}
 	if err := doApigeeRequest(ctx, "GET", devsUrl, nil, &devsResp); err != nil {
-		return fmt.Errorf("failed to get developers for org %s: %v", projectId, err)
+		log.Printf("failed to get developers for org $s, %v", projectId, err)
 	}
 	for _, d := range devsResp.Developer {
 		emailsToQuery = append(emailsToQuery, d.Email)
@@ -331,6 +331,465 @@ func sseHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// --- MCP and Business Data Types ---
+
+type MCPRequest struct {
+	JSONRPC string          `json:"jsonrpc"`
+	Method  string          `json:"method"`
+	Params  json.RawMessage `json:"params"`
+	ID      interface{}     `json:"id"`
+}
+
+type MCPResponse struct {
+	JSONRPC string      `json:"jsonrpc"`
+	Result  interface{} `json:"result,omitempty"`
+	Error   interface{} `json:"error,omitempty"`
+	ID      interface{} `json:"id"`
+}
+
+type CallToolRequest struct {
+	Name      string          `json:"name"`
+	Arguments json.RawMessage `json:"arguments"`
+}
+
+type Customer struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+type Address struct {
+	ID         string `json:"id"`
+	CustomerID string `json:"customer_id"`
+	Street     string `json:"street"`
+	City       string `json:"city"`
+	State      string `json:"state"`
+	Zip        string `json:"zip"`
+}
+
+type Order struct {
+	ID         string    `json:"id"`
+	CustomerID string    `json:"customer_id"`
+	Amount     float64   `json:"amount"`
+	Status     string    `json:"status"` // pending, shipped, delivered, cancelled
+	CreatedAt  time.Time `json:"created_at"`
+}
+
+type Ticket struct {
+	ID         string    `json:"id"`
+	CustomerID string    `json:"customer_id"`
+	Subject    string    `json:"subject"`
+	Status     string    `json:"status"` // open, in_progress, resolved, closed
+	CreatedAt  time.Time `json:"created_at"`
+}
+
+type Product struct {
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Category    string  `json:"category"`
+	Price       float64 `json:"price"`
+	Stock       int     `json:"stock"`
+}
+
+var (
+	bizDataMutex sync.RWMutex
+	customers    = []Customer{
+		{ID: "cust_1", Name: "Alice Johnson", Email: "alice@example.com"},
+		{ID: "cust_2", Name: "Bob Smith", Email: "bob@example.com"},
+		{ID: "cust_3", Name: "Charlie Brown", Email: "charlie@example.com"},
+	}
+	addresses = []Address{
+		{ID: "addr_1", CustomerID: "cust_1", Street: "123 Maple St", City: "Springfield", State: "IL", Zip: "62704"},
+		{ID: "addr_2", CustomerID: "cust_2", Street: "456 Oak Ave", City: "Metropolis", State: "NY", Zip: "10001"},
+		{ID: "addr_3", CustomerID: "cust_3", Street: "789 Pine Ln", City: "Gotham", State: "NJ", Zip: "07001"},
+	}
+	orders = []Order{
+		{ID: "ord_1", CustomerID: "cust_1", Amount: 125.50, Status: "shipped", CreatedAt: time.Now().Add(-48 * time.Hour)},
+		{ID: "ord_2", CustomerID: "cust_2", Amount: 50.00, Status: "pending", CreatedAt: time.Now().Add(-2 * time.Hour)},
+		{ID: "ord_3", CustomerID: "cust_1", Amount: 210.00, Status: "delivered", CreatedAt: time.Now().Add(-120 * time.Hour)},
+	}
+	tickets = []Ticket{
+		{ID: "tkt_1", CustomerID: "cust_1", Subject: "Package not received", Status: "open", CreatedAt: time.Now().Add(-24 * time.Hour)},
+		{ID: "tkt_2", CustomerID: "cust_3", Subject: "Login issue", Status: "resolved", CreatedAt: time.Now().Add(-72 * time.Hour)},
+	}
+	products = []Product{
+		{ID: "prod_1", Name: "Wireless Mouse", Description: "Ergonomic 2.4GHz wireless mouse", Category: "Electronics", Price: 29.99, Stock: 150},
+		{ID: "prod_2", Name: "Mechanical Keyboard", Description: "RGB backlit mechanical keyboard", Category: "Electronics", Price: 89.99, Stock: 75},
+		{ID: "prod_3", Name: "Desk Lamp", Description: "LED desk lamp with adjustable brightness", Category: "Office", Price: 45.00, Stock: 200},
+		{ID: "prod_4", Name: "USB-C Hub", Description: "7-in-1 USB-C adapter with HDMI and Power Delivery", Category: "Electronics", Price: 59.99, Stock: 120},
+		{ID: "prod_5", Name: "Notebook", Description: "Premium A5 ruled notebook", Category: "Stationery", Price: 12.50, Stock: 500},
+	}
+)
+
+func productsHandler(w http.ResponseWriter, r *http.Request) {
+	bizDataMutex.Lock()
+	defer bizDataMutex.Unlock()
+
+	switch r.Method {
+	case http.MethodGet:
+		id := r.PathValue("id")
+		if id != "" {
+			for _, p := range products {
+				if p.ID == id {
+					jsonResponse(w, http.StatusOK, p)
+					return
+				}
+			}
+			jsonResponse(w, http.StatusNotFound, map[string]string{"error": "product not found"})
+			return
+		}
+
+		// Search/List
+		q := r.URL.Query().Get("q")
+		cat := r.URL.Query().Get("category")
+		var filtered []Product
+		for _, p := range products {
+			match := true
+			if cat != "" && !strings.EqualFold(p.Category, cat) {
+				match = false
+			}
+			if q != "" && !strings.Contains(strings.ToLower(p.Name), strings.ToLower(q)) && !strings.Contains(strings.ToLower(p.Description), strings.ToLower(q)) {
+				match = false
+			}
+			if match {
+				filtered = append(filtered, p)
+			}
+		}
+		jsonResponse(w, http.StatusOK, filtered)
+
+	case http.MethodPost:
+		var p Product
+		if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+			jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON"})
+			return
+		}
+		if p.ID == "" {
+			p.ID = fmt.Sprintf("prod_%d", len(products)+1)
+		}
+		products = append(products, p)
+		jsonResponse(w, http.StatusCreated, p)
+
+	case http.MethodPut:
+		id := r.PathValue("id")
+		if id == "" {
+			jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "ID required for update"})
+			return
+		}
+		var updated Product
+		if err := json.NewDecoder(r.Body).Decode(&updated); err != nil {
+			jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON"})
+			return
+		}
+		for i, p := range products {
+			if p.ID == id {
+				updated.ID = id // Ensure ID remains same
+				products[i] = updated
+				jsonResponse(w, http.StatusOK, updated)
+				return
+			}
+		}
+		jsonResponse(w, http.StatusNotFound, map[string]string{"error": "product not found"})
+
+	case http.MethodDelete:
+		id := r.PathValue("id")
+		for i, p := range products {
+			if p.ID == id {
+				products = append(products[:i], products[i+1:]...)
+				jsonResponse(w, http.StatusNoContent, nil)
+				return
+			}
+		}
+		jsonResponse(w, http.StatusNotFound, map[string]string{"error": "product not found"})
+
+	default:
+		jsonResponse(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+	}
+}
+
+func mcpHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonResponse(w, http.StatusMethodNotAllowed, map[string]string{"error": "only POST allowed"})
+		return
+	}
+
+	var req MCPRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON"})
+		return
+	}
+
+	var result interface{}
+	var err error
+
+	switch req.Method {
+	case "initialize":
+		result = map[string]interface{}{
+			"protocolVersion": "2024-11-05",
+			"capabilities": map[string]interface{}{
+				"tools": map[string]interface{}{},
+			},
+			"serverInfo": map[string]string{
+				"name":    "Business Operations Server",
+				"version": "1.0.0",
+			},
+		}
+	case "tools/list":
+		result = map[string]interface{}{
+			"tools": []interface{}{
+				map[string]interface{}{
+					"name":        "list_customers",
+					"description": "List all customers",
+					"inputSchema": map[string]interface{}{
+						"type":       "object",
+						"properties": map[string]interface{}{},
+					},
+				},
+				map[string]interface{}{
+					"name":        "get_customer",
+					"description": "Get customer details by ID",
+					"inputSchema": map[string]interface{}{
+						"type": "object",
+						"properties": map[string]interface{}{
+							"id": map[string]interface{}{"type": "string"},
+						},
+						"required": []string{"id"},
+					},
+				},
+				map[string]interface{}{
+					"name":        "update_customer_address",
+					"description": "Update a customer's address",
+					"inputSchema": map[string]interface{}{
+						"type": "object",
+						"properties": map[string]interface{}{
+							"customer_id": map[string]interface{}{"type": "string"},
+							"street":      map[string]interface{}{"type": "string"},
+							"city":        map[string]interface{}{"type": "string"},
+							"state":       map[string]interface{}{"type": "string"},
+							"zip":         map[string]interface{}{"type": "string"},
+						},
+						"required": []string{"customer_id"},
+					},
+				},
+				map[string]interface{}{
+					"name":        "list_orders",
+					"description": "List orders, optionally filtered by customer ID",
+					"inputSchema": map[string]interface{}{
+						"type": "object",
+						"properties": map[string]interface{}{
+							"customer_id": map[string]interface{}{"type": "string"},
+						},
+					},
+				},
+				map[string]interface{}{
+					"name":        "update_order_status",
+					"description": "Update the status of an order",
+					"inputSchema": map[string]interface{}{
+						"type": "object",
+						"properties": map[string]interface{}{
+							"order_id": map[string]interface{}{"type": "string"},
+							"status":   map[string]interface{}{"type": "string", "enum": []string{"pending", "shipped", "delivered", "cancelled"}},
+						},
+						"required": []string{"order_id", "status"},
+					},
+				},
+				map[string]interface{}{
+					"name":        "create_ticket",
+					"description": "Create a new customer support ticket",
+					"inputSchema": map[string]interface{}{
+						"type": "object",
+						"properties": map[string]interface{}{
+							"customer_id": map[string]interface{}{"type": "string"},
+							"subject":     map[string]interface{}{"type": "string"},
+						},
+						"required": []string{"customer_id", "subject"},
+					},
+				},
+				map[string]interface{}{
+					"name":        "list_tickets",
+					"description": "List customer support tickets",
+					"inputSchema": map[string]interface{}{
+						"type": "object",
+						"properties": map[string]interface{}{
+							"customer_id": map[string]interface{}{"type": "string"},
+						},
+					},
+				},
+				map[string]interface{}{
+					"name":        "update_ticket_status",
+					"description": "Update the status of a support ticket",
+					"inputSchema": map[string]interface{}{
+						"type": "object",
+						"properties": map[string]interface{}{
+							"ticket_id": map[string]interface{}{"type": "string"},
+							"status":    map[string]interface{}{"type": "string", "enum": []string{"open", "in_progress", "resolved", "closed"}},
+						},
+						"required": []string{"ticket_id", "status"},
+					},
+				},
+			},
+		}
+	case "tools/call":
+		var callReq CallToolRequest
+		if err := json.Unmarshal(req.Params, &callReq); err != nil {
+			jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "invalid params"})
+			return
+		}
+		result, err = handleToolCall(callReq.Name, callReq.Arguments)
+	default:
+		jsonResponse(w, http.StatusNotFound, map[string]string{"error": "method not found"})
+		return
+	}
+
+	if err != nil {
+		jsonResponse(w, http.StatusOK, MCPResponse{
+			JSONRPC: "2.0",
+			Error:   map[string]interface{}{"code": -32603, "message": err.Error()},
+			ID:      req.ID,
+		})
+		return
+	}
+
+	jsonResponse(w, http.StatusOK, MCPResponse{
+		JSONRPC: "2.0",
+		Result:  result,
+		ID:      req.ID,
+	})
+}
+
+func handleToolCall(name string, arguments json.RawMessage) (interface{}, error) {
+	bizDataMutex.Lock()
+	defer bizDataMutex.Unlock()
+
+	var args map[string]interface{}
+	json.Unmarshal(arguments, &args)
+
+	switch name {
+	case "list_customers":
+		return mcpTextResponse(customers), nil
+
+	case "get_customer":
+		id, _ := args["id"].(string)
+		for _, c := range customers {
+			if c.ID == id {
+				// Find address too
+				var addr Address
+				for _, a := range addresses {
+					if a.CustomerID == id {
+						addr = a
+						break
+					}
+				}
+				return mcpTextResponse(map[string]interface{}{
+					"customer": c,
+					"address":  addr,
+				}), nil
+			}
+		}
+		return nil, fmt.Errorf("customer not found: %s", id)
+
+	case "update_customer_address":
+		customerID, _ := args["customer_id"].(string)
+		for i, a := range addresses {
+			if a.CustomerID == customerID {
+				if v, ok := args["street"].(string); ok {
+					addresses[i].Street = v
+				}
+				if v, ok := args["city"].(string); ok {
+					addresses[i].City = v
+				}
+				if v, ok := args["state"].(string); ok {
+					addresses[i].State = v
+				}
+				if v, ok := args["zip"].(string); ok {
+					addresses[i].Zip = v
+				}
+				return mcpTextResponse(addresses[i]), nil
+			}
+		}
+		// If address doesn't exist, create it
+		newAddr := Address{
+			ID:         fmt.Sprintf("addr_%d", len(addresses)+1),
+			CustomerID: customerID,
+			Street:     args["street"].(string),
+			City:       args["city"].(string),
+			State:      args["state"].(string),
+			Zip:        args["zip"].(string),
+		}
+		addresses = append(addresses, newAddr)
+		return mcpTextResponse(newAddr), nil
+
+	case "list_orders":
+		customerID, _ := args["customer_id"].(string)
+		var filtered []Order
+		for _, o := range orders {
+			if customerID == "" || o.CustomerID == customerID {
+				filtered = append(filtered, o)
+			}
+		}
+		return mcpTextResponse(filtered), nil
+
+	case "update_order_status":
+		orderID, _ := args["order_id"].(string)
+		status, _ := args["status"].(string)
+		for i, o := range orders {
+			if o.ID == orderID {
+				orders[i].Status = status
+				return mcpTextResponse(orders[i]), nil
+			}
+		}
+		return nil, fmt.Errorf("order not found: %s", orderID)
+
+	case "create_ticket":
+		customerID, _ := args["customer_id"].(string)
+		subject, _ := args["subject"].(string)
+		newTicket := Ticket{
+			ID:         fmt.Sprintf("tkt_%d", len(tickets)+1),
+			CustomerID: customerID,
+			Subject:    subject,
+			Status:     "open",
+			CreatedAt:  time.Now(),
+		}
+		tickets = append(tickets, newTicket)
+		return mcpTextResponse(newTicket), nil
+
+	case "list_tickets":
+		customerID, _ := args["customer_id"].(string)
+		var filtered []Ticket
+		for _, t := range tickets {
+			if customerID == "" || t.CustomerID == customerID {
+				filtered = append(filtered, t)
+			}
+		}
+		return mcpTextResponse(filtered), nil
+
+	case "update_ticket_status":
+		ticketID, _ := args["ticket_id"].(string)
+		status, _ := args["status"].(string)
+		for i, t := range tickets {
+			if t.ID == ticketID {
+				tickets[i].Status = status
+				return mcpTextResponse(tickets[i]), nil
+			}
+		}
+		return nil, fmt.Errorf("ticket not found: %s", ticketID)
+	}
+
+	return nil, fmt.Errorf("unknown tool: %s", name)
+}
+
+func mcpTextResponse(data interface{}) interface{} {
+	b, _ := json.MarshalIndent(data, "", "  ")
+	return map[string]interface{}{
+		"content": []interface{}{
+			map[string]interface{}{
+				"type": "text",
+				"text": string(b),
+			},
+		},
+	}
+}
+
 func main() {
 	mux := http.NewServeMux()
 
@@ -341,6 +800,11 @@ func main() {
 	mux.HandleFunc("/api/projects/{projectId}/users/{email}/analytics", withCORS(userAnalyticsHandler))
 	mux.HandleFunc("/api/projects/{projectId}/users/analytics", withCORS(userAnalyticsHandler))
 	mux.HandleFunc("/api/config", withCORS(configHandler))
+
+	// mock business services
+	mux.HandleFunc("/products", withCORS(productsHandler))
+	mux.HandleFunc("/products/{id}", withCORS(productsHandler))
+	mux.HandleFunc("/mcp", withCORS(mcpHandler))
 
 	// Initial cache load for the default project (if set)
 	projectId := os.Getenv("GOOGLE_CLOUD_PROJECT")

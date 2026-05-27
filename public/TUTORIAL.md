@@ -89,7 +89,7 @@ These **optional parameters** can be added to the `apply` command to customize t
 * **--var "network=$APIGEE_VPC_NAME"**
 * **--var "subnet=$APIGEE_SUBNET_NAME"`**
 
-Run these commands to provision:
+Run these commands to provision, and type **yes** after reviewing the changes:
 ```sh
 cd tf/apigee
 terraform init
@@ -137,10 +137,10 @@ Let's create a simple **AI-Gemini** proxy to add governance & analytics to more 
 
 <img src="https://iili.io/C9TZOgt.png" height=60 />
 
-We will use the **aft** command to create a proxy with the base path **/gemini** and directing traffic to the Google Cloud AI endpoint.
+We will use the **aft** command to create a proxy with the base path **/gemini** (plus your unique name), and proxying traffic to the Google Cloud AI endpoint.
 
 ```sh
-aft -b "/$UNIQUE_NAME-gemini" -u https://aiplatform.googleapis.com -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Gemini:$APIGEE_ENVIRONMENT"
+aft -b "/${UNIQUE_NAME,,}-gemini" -u https://aiplatform.googleapis.com -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Gemini:$APIGEE_ENVIRONMENT"
 ```
 
 Open the proxy in the [Google Cloud Console](https://console.cloud.google.com/apigee/proxies), click on your **proxy**, and wait until the deployment is complete (you should see a green ✅ next to the deployment).
@@ -154,11 +154,11 @@ After the deployment is complete, click on the **Debug** tab in the proxy screen
 Let's now call the proxy URL with our same prompt, but this time see the request processing through our proxy in Apigee. Notice the **$APIGEE_HOST** parameter in the URL, which points the request to our Apigee endpoint.
 
 ```sh
-curl -i -X POST "https://$APIGEE_HOST/$UNIQUE_NAME-gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H "Content-Type: application/json" \
+curl -i -X POST "https://$APIGEE_HOST/${UNIQUE_NAME,,}-gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H "Content-Type: application/json" \
 -d '{"contents": [{"role": "USER", "parts": [{"text": "why is the sky blue?"}]}]}'
 ```
 
-You should get a similar response again about **'Rayleigh scattering'**. 
+You should get a similar response again about **'Rayleigh scattering'**. In case you get an **OpenSSL SSL_connect** error it means that the load balancer certificate is still provisioning, so just wait a few minutes and try again until it works (can take 5-10 minutes).
 
 Go back to the Debug panel, and see the processing steps, timings and variables that were done between the request and response.
 
@@ -177,14 +177,13 @@ The proxy definitions are YAML templates (see <walkthrough-editor-open-file file
 Deploy the AI proxy templates:
 
 ```sh
-# Deploy Gemini Proxy
-aft AI-Proxy-Gemini.yaml -o $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Gemini:$APIGEE_ENVIRONMENT:$PROXY_SA -p "ModelBasePath=/$UNIQUE_NAME-gemini"
+aft AI-Proxy-Gemini.yaml -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Gemini:$APIGEE_ENVIRONMENT:$PROXY_SA" -p "ModelBasePath=/${UNIQUE_NAME,,}-gemini"
 # Deploy DeepSeek Proxy
-aft AI-Proxy-DeepSeek.yaml -o $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-DeepSeek:$APIGEE_ENVIRONMENT:$PROXY_SA -p "ModelBasePath=/$UNIQUE_NAME-deepseek"
+aft AI-Proxy-DeepSeek.yaml -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-DeepSeek:$APIGEE_ENVIRONMENT:$PROXY_SA" -p "ModelBasePath=/${UNIQUE_NAME,,}-deepseek"
 # Deploy Qwen Proxy
-aft AI-Proxy-Qwen.yaml -o $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Qwen:$APIGEE_ENVIRONMENT:$PROXY_SA -p "ModelBasePath=/$UNIQUE_NAME-qwen"
+aft AI-Proxy-Qwen.yaml -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Qwen:$APIGEE_ENVIRONMENT:$PROXY_SA" -p "ModelBasePath=/${UNIQUE_NAME,,}-qwen"
 # Deploy Claude Proxy
-aft AI-Proxy-Claude.yaml -o $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Claude:$APIGEE_ENVIRONMENT:$PROXY_SA -p "ModelBasePath=/$UNIQUE_NAME-claude"
+aft AI-Proxy-Claude.yaml -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Claude:$APIGEE_ENVIRONMENT:$PROXY_SA" -p "ModelBasePath=/${UNIQUE_NAME,,}-claude"
 # Deploy Analytics Proxy
 aft -i AI-Analytics.yaml -o $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAMEAnalytics:$APIGEE_ENVIRONMENT
 ```
@@ -208,7 +207,7 @@ source ./sh/script_register_key.sh
 Now let's call our model proxy with an API key as credential, that has subscribed to the **AI-Gemini** product with certain LLM token quotas. You can start a debug session again in the Apigee console if you wish to see the processing steps.
 
 ```sh
-curl -i -X POST "https://$APIGEE_HOST/gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
+curl -i -X POST "https://$APIGEE_HOST/${UNIQUE_NAME,,}-gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
 -d '{"model": "google/gemini-flash-latest", "stream": true, "messages":  [{"role": "user", "content": "Why is the sky blue?"}]}'
 ```
 
@@ -219,7 +218,7 @@ curl -i -X POST "https://$APIGEE_HOST/gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJ
 In our Gemini proxy deployment, we set a model allowed flag to **gemini**, so let's try calling another model on our endpoint, and see if it's rejected:
 
 ```sh
-curl -i -X POST "https://$APIGEE_HOST/gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
+curl -i -X POST "https://$APIGEE_HOST/${UNIQUE_NAME,,}-gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
 -d '{"model": "hackernews/cool-0.1-model", "stream": true, "messages":  [{"role": "user", "content": "What does the Orion constellation look like?"}]}'
 ```
 
@@ -232,7 +231,7 @@ You should get a **Model not allowed** response.
 Now let's do a call to a non-existent Gemini model, and force a model failver to the configured failover model in the proxy, **gemini-flash-latest**.
 
 ```sh
-curl -i -X POST "https://$APIGEE_HOST/gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
+curl -i -X POST "https://$APIGEE_HOST/${UNIQUE_NAME,,}-gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
 -d '{"model": "google/gemini-5.1-pro", "stream": true, "messages":  [{"role": "user", "content": "What does the Orion constellation look like?"}]}'
 ```
 
@@ -245,10 +244,10 @@ You should get a response from **google/gemini-flash-latest** since the requeste
 Let's call some more models.
 
 ```sh
-curl -i -X POST "https://$APIGEE_HOST/deepseek/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
+curl -i -X POST "https://$APIGEE_HOST/${UNIQUE_NAME,,}-deepseek/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
 -d '{"model": "deepseek-ai/deepseek-v3.2-maas", "stream": true, "messages":  [{"role": "user", "content": "What does the Orion constellation look like?"}]}'
 
-curl -i -X POST "https://$APIGEE_HOST/qwen/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
+curl -i -X POST "https://$APIGEE_HOST/${UNIQUE_NAME,,}-qwen/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
 -d '{"model": "qwen/qwen3-next-80b-a3b-thinking-maas", "stream": false, "messages":  [{"role": "user", "content": "What is a constellation in astronomy?"}]}'
 ```
 
@@ -262,7 +261,7 @@ Enable Anthropic models to call them through the **Claude** proxy.
 Call Claude Sonnet 4.6 through the **Claude** proxy.
 
 ```sh
-curl -i -X POST "https://$APIGEE_HOST/claude/v1/projects/$PROJECT_ID/locations/global/publishers/anthropic/models/claude-sonnet-4-6:streamRawPredict" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
+curl -i -X POST "https://$APIGEE_HOST/${UNIQUE_NAME,,}-claude/v1/projects/$PROJECT_ID/locations/global/publishers/anthropic/models/claude-sonnet-4-6:streamRawPredict" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
 -d '{"stream": true, "anthropic_version": "vertex-2023-10-16", "max_tokens": 100, "messages": [{"role": "user", "content": "What does the constellation Cassiopeia look like?"}]}'
 ```
 
@@ -275,7 +274,7 @@ curl -i -X POST "https://$APIGEE_HOST/claude/v1/projects/$PROJECT_ID/locations/g
 Now let's update our terminal session with our new **Gemini Proxy** information by setting these variables:
 
 ```sh
-export GOOGLE_VERTEX_BASE_URL="https://$APIGEE_HOST/gemini"
+export GOOGLE_VERTEX_BASE_URL="https://$APIGEE_HOST/${UNIQUE_NAME,,}-gemini"
 export GEMINI_CLI_CUSTOM_HEADERS="x-api-key: $API_KEY"
 ```
 

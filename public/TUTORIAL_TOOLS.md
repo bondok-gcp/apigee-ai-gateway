@@ -35,7 +35,7 @@ source ./sh/script_get_apigee.sh
 
 [Apigee API Hub](https://docs.cloud.google.com/apigee/docs/apihub/what-is-api-hub) is a universal repository for any type of API, and so will be used in this lab to manage and store the AI tools' metadata and schemas.
 
-In case API Hub is not already provisioned in your **Google Cloud Project**, then you can easily provision it with this **Terraform** command:
+In case API Hub is not already provisioned in your **Google Cloud Project**, then you can easily provision it with this **Terraform** command and entering **yes** after reviewing the changes:
 
 ```sh
 cd tf/hub
