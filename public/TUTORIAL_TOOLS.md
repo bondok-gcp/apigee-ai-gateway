@@ -1,6 +1,9 @@
 # AI Gateway Tools Lab
+![Gemini proxy debug](https://amalbagee.web.app/apigee/ai-tools-gov1.png)
+
 ---
-This tutorial helps you add security policies such as model prompt screening with [Model Armor](https://cloud.google.com/security/products/model-armor) and PII data masking with [Sensitive Data Protection](https://cloud.google.com/security/products/sensitive-data-protection) to the **AI Gateway** that you created in the first **Foundations Lab**.
+
+In this lab you will add tool goverance & integration to the **AI Gateway** that you created in the first **Foundations Lab**.
 
 Let's get started!
 
@@ -13,7 +16,7 @@ Let's get started!
 1. **Copy** the `./sh/env.sh` file to a local `.env` file by running this command.
 
 ```sh
-cp ./sh/env.sh .env
+cp --update=none ./sh/env.sh .env
 ```
 
 2. **Click**  <walkthrough-editor-open-file filePath=".env">here</walkthrough-editor-open-file> to open the `.env` file in the editor.
@@ -25,4 +28,9 @@ source .env
 source ./sh/script_get_apigee.sh
 ```
 
----
+### Install Tooling
+
+Just in case they are no longer installed:
+```sh
+npm i apigee-templater -g
+```

@@ -38,11 +38,13 @@ npm i apigee-templater -g
 
 Now we will create a **[Model Armor](https://cloud.google.com/security/products/model-armor)** template to use in our proxies. For production you can create many templates and route between them based on the user or context, however for this lab we can start with one template.
 
-Run these commands to create a new template called **default-ma-template**:
+Run these commands to create a new template called **default-ma-template**. If you would like to use **Model Armor** in the `us` location or a specific region, set the **MA_LOCATION** variable below with any of the locations documented [here](https://docs.cloud.google.com/model-armor/locations).
 
 ```sh
-gcloud config set api_endpoint_overrides/modelarmor "https://modelarmor.$GOOGLE_CLOUD_LOCATION.rep.googleapis.com/"
-gcloud model-armor templates create default-ma-template --project=$GOOGLE_CLOUD_PROJECT --location=$GOOGLE_CLOUD_LOCATION \
+MA_LOCATION=eu
+gcloud config set api_endpoint_overrides/modelarmor "https://modelarmor.$MA_LOCATION.rep.googleapis.com/"
+
+gcloud model-armor templates create default-ma-template --project=$GOOGLE_CLOUD_PROJECT --location=$MA_LOCATION \
     --rai-settings-filters='[{ "filterType": "HATE_SPEECH", "confidenceLevel": "MEDIUM_AND_ABOVE" },{ "filterType": "HARASSMENT", "confidenceLevel": "MEDIUM_AND_ABOVE" },{ "filterType": "SEXUALLY_EXPLICIT", "confidenceLevel": "MEDIUM_AND_ABOVE" },{ "filterType": "DANGEROUS", "confidenceLevel": "MEDIUM_AND_ABOVE" }]' \
     --basic-config-filter-enforcement=disabled  \
     --pi-and-jailbreak-filter-settings-enforcement=disabled \
@@ -67,7 +69,7 @@ We can again use the [aft](https://github.com/apigee/apigee-templater) to add se
 
 1. Apply the feature **ai-security** that adds **Model Armor** prompt screening:
 ```sh
-aft -i $GOOGLE_CLOUD_PROJECT:AI-Gemini -a ai-security -o $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT:$PROXY_ID
+aft -i $GOOGLE_CLOUD_PROJECT:AI-Gemini -a ai-security -o $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT:$PROXY_ID -p "ModelArmorLocation=$MA_LOCATION"
 ```
 
 Open the proxy in the [Google Cloud Console](https://console.cloud.google.com/apigee/proxies/AI-Gemini/overview), and wait until the deployment is complete (you should see a green ✅ next to the deployment).

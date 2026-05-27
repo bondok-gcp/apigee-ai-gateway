@@ -33,6 +33,9 @@ gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
 gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
     --member="serviceAccount:ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com" \
     --role="roles/modelarmor.user"
+gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+    --member="serviceAccount:ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com" \
+    --role="roles/dlp.user"
 gcloud iam service-accounts add-iam-policy-binding \
   ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com \
   --member="user:$(gcloud config get-value account 2>/dev/null)" \
