@@ -140,10 +140,10 @@ Let's create a simple **AI-Gemini** proxy to add governance & analytics to more 
 We will use the **aft** command to create a proxy with the base path **/gemini** and directing traffic to the Google Cloud AI endpoint.
 
 ```sh
-aft -b /gemini -u https://aiplatform.googleapis.com -o $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT
+aft -b "/$UNIQUE_NAME-gemini" -u https://aiplatform.googleapis.com -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Gemini:$APIGEE_ENVIRONMENT"
 ```
 
-Open the proxy in the [Google Cloud Console](https://console.cloud.google.com/apigee/proxies/AI-Gemini/overview), and wait until the deployment is complete (you should see a green ✅ next to the deployment).
+Open the proxy in the [Google Cloud Console](https://console.cloud.google.com/apigee/proxies), click on your **proxy**, and wait until the deployment is complete (you should see a green ✅ next to the deployment).
 
 [![Gemini proxy deploy](https://amalbagee.web.app/apigee/ai-gemini-deploy1.png)](https://amalbagee.web.app/apigee/ai-gemini-deploy1.png)
 
@@ -154,7 +154,7 @@ After the deployment is complete, click on the **Debug** tab in the proxy screen
 Let's now call the proxy URL with our same prompt, but this time see the request processing through our proxy in Apigee. Notice the **$APIGEE_HOST** parameter in the URL, which points the request to our Apigee endpoint.
 
 ```sh
-curl -i -X POST "https://$APIGEE_HOST/gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H "Content-Type: application/json" \
+curl -i -X POST "https://$APIGEE_HOST/$UNIQUE_NAME-gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H "Content-Type: application/json" \
 -d '{"contents": [{"role": "USER", "parts": [{"text": "why is the sky blue?"}]}]}'
 ```
 
@@ -177,11 +177,16 @@ The proxy definitions are YAML templates (see <walkthrough-editor-open-file file
 Deploy the AI proxy templates:
 
 ```sh
-aft AI-Proxy-Gemini.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT:$PROXY_ID
-aft AI-Proxy-DeepSeek.yaml -o $GOOGLE_CLOUD_PROJECT:AI-DeepSeek:$APIGEE_ENVIRONMENT:$PROXY_ID
-aft AI-Proxy-Qwen.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Qwen:$APIGEE_ENVIRONMENT:$PROXY_ID
-aft AI-Proxy-Claude.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Claude:$APIGEE_ENVIRONMENT:$PROXY_ID
-aft -i AI-Analytics.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Analytics:$APIGEE_ENVIRONMENT
+# Deploy Gemini Proxy
+aft AI-Proxy-Gemini.yaml -o $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Gemini:$APIGEE_ENVIRONMENT:$PROXY_SA -p "ModelBasePath=/$UNIQUE_NAME-gemini"
+# Deploy DeepSeek Proxy
+aft AI-Proxy-DeepSeek.yaml -o $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-DeepSeek:$APIGEE_ENVIRONMENT:$PROXY_SA -p "ModelBasePath=/$UNIQUE_NAME-deepseek"
+# Deploy Qwen Proxy
+aft AI-Proxy-Qwen.yaml -o $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Qwen:$APIGEE_ENVIRONMENT:$PROXY_SA -p "ModelBasePath=/$UNIQUE_NAME-qwen"
+# Deploy Claude Proxy
+aft AI-Proxy-Claude.yaml -o $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Claude:$APIGEE_ENVIRONMENT:$PROXY_SA -p "ModelBasePath=/$UNIQUE_NAME-claude"
+# Deploy Analytics Proxy
+aft -i AI-Analytics.yaml -o $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAMEAnalytics:$APIGEE_ENVIRONMENT
 ```
 
 Now let's create a **product** & **subscription** to the **AI-Gemini** proxy. [Products](https://docs.cloud.google.com/apigee/docs/api-platform/publish/what-api-product) and [Subscriptions](https://docs.cloud.google.com/apigee/docs/api-platform/publish/creating-apps-surface-your-api) allow user authorization and detailed quotas on things like number of tokens, calls or specific models, paths or operations.

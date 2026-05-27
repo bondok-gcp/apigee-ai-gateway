@@ -47,4 +47,12 @@ source ./sh/script_hub_init.sh
 
 Provisioning usually takes 10-15 minutes.
 
-##
+At the moment you also need to manually configure the attachment for Apigee X, so [open the console](https://console.cloud.google.com/apigee/api-hub/settings/project-associations) and make sure that **Apigee X and Hybrid** is configured under **Associated plugins**. If it's blank, click on **Edit settings** and click **Apigee X and Hybrid**, and then save.
+
+![API Hub plugin configuration](https://amalbagee.web.app/apigee/apihub-plugins1.png)
+
+## Add Tools to Catalog
+
+If you [open the API Hub console](https://console.cloud.google.com/apigee/api-hub/apis), you should see the **AI model proxies** that we deployed in the **Foundations Lab**.
+
+[![API Hub Catalog](https://amalbagee.web.app/apigee/apihub-catalog1.png)](https://amalbagee.web.app/apigee/apihub-catalog1.png)

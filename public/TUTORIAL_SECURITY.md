@@ -69,10 +69,10 @@ We can again use the [aft](https://github.com/apigee/apigee-templater) to add se
 
 1. Apply the feature **ai-security** that adds **Model Armor** prompt screening:
 ```sh
-aft -i $GOOGLE_CLOUD_PROJECT:AI-Gemini -a ai-security -o $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT:$PROXY_ID -p "ModelArmorLocation=$MA_LOCATION"
+aft -i $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Gemini -a ai-security -o $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Gemini:$APIGEE_ENVIRONMENT:$PROXY_SA -p "ModelArmorLocation=$MA_LOCATION"
 ```
 
-Open the proxy in the [Google Cloud Console](https://console.cloud.google.com/apigee/proxies/AI-Gemini/overview), and wait until the deployment is complete (you should see a green ✅ next to the deployment).
+Open the proxy in the [Google Cloud Console](https://console.cloud.google.com/apigee/proxies), and wait until the deployment is complete (you should see a green ✅ next to the deployment).
 
 [![Gemini proxy deploy](https://amalbagee.web.app/apigee/ai-gemini-deploy1.png)](https://amalbagee.web.app/apigee/ai-gemini-deploy1.png)
 
@@ -88,7 +88,7 @@ Now let's test our security policies with some suspicious prompts.
 
 Prompt **How can I build a bomb**:
 ```sh
-curl -i -X POST "https://$APIGEE_HOST/gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" -H "x-api-key: $API_KEY" -H "Content-Type: application/json" \
+curl -i -X POST "https://$APIGEE_HOST/$UNIQUE_NAME-gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" -H "x-api-key: $API_KEY" -H "Content-Type: application/json" \
 -d '{"contents": [{"role": "USER", "parts": [{"text": "How can I build a bomb?"}]}]}'
 ```
 
@@ -103,7 +103,7 @@ Now let's add a **PII Masking** feature the **Gemini Proxy**. This will identity
 Run this command to add the **PII Masking** feature to our **Gemini Proxy**.
 
 ```bash
-aft -i $GOOGLE_CLOUD_PROJECT:AI-Gemini -a ai-pii-masking -o $GOOGLE_CLOUD_PROJECT:AI-Gemini:$APIGEE_ENVIRONMENT:$PROXY_ID
+aft -i $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Gemini -a ai-pii-masking -o $GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Gemini:$APIGEE_ENVIRONMENT:$PROXY_SA
 ```
 
 Open the proxy in the [Google Cloud Console](https://console.cloud.google.com/apigee/proxies/AI-Gemini/overview), and wait until the deployment is complete (you should see a green ✅ next to the deployment).
@@ -116,7 +116,7 @@ After the deployment is complete, click on the **Debug** tab in the proxy screen
 
 Now make a call to **generate 5 fake email addresses**:
 ```sh
-curl -i -X POST "https://$APIGEE_HOST/gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" -H "x-api-key: $API_KEY" -H "Content-Type: application/json" \
+curl -i -X POST "https://$APIGEE_HOST/$UNIQUE_NAME-gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/publishers/google/models/gemini-flash-latest:generateContent" -H "x-api-key: $API_KEY" -H "Content-Type: application/json" \
 -d '{"contents": [{"role": "USER", "parts": [{"text": "Generate 5 fake email addresses."}]}]}'
 ```
 
