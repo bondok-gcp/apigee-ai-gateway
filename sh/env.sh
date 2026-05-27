@@ -7,8 +7,8 @@ export GOOGLE_CLOUD_LOCATION=YOUR_REGION
 export APIGEE_TYPE=EVALUATION
 
 # Optional Variables:
-# UNIQUE_NAME is used if you are working in a lab with others, this will be added as a suffix to your resources so that nothing is overwritten. Change this to your name, or leave as is for default handling.
-export UNIQUE_NAME=Proxy
+# UNIQUE_NAME is used if you are working in a lab with others, this will be added as a suffix to your resources so that nothing is overwritten. By default your username is used, however you can change it if needed.
+export UNIQUE_NAME=$USER
 # APIGEE_VPC_NAME can be used if you want Apigee to use an existing VPC in the project for the PSC network configuration.
 export APIGEE_VPC_NAME=
 # APIGEE_SUBNET_NAME can be used for the subnet name in the APIGEE_VPC_NAME VPC.
