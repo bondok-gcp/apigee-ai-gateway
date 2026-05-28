@@ -12,7 +12,7 @@ These labs guide you through creating an AI Gateway on Google Cloud leveraging [
 
 ## Prerequisites
 To run these labs you will need:
-* A pre-created [Google Cloud sandbox project](https://docs.cloud.google.com/resource-manager/docs/creating-managing-projects) with either the role **roles/owner**, or these roles assigned: **apigee.admin, apihub.admin, serviceusage.serviceUsageAdmin, iam.serviceAccountAdmin, compute.admin, compute.networkAdmin, cloudkms.admin, roles/ml.admin**.
+* A pre-created [Google Cloud sandbox project](https://docs.cloud.google.com/resource-manager/docs/creating-managing-projects) with either the role **roles/owner**, or these roles assigned: **apigee.admin, apihub.admin, serviceusage.serviceUsageAdmin, iam.serviceAccountAdmin, compute.admin, compute.networkAdmin, cloudkms.admin, ml.admin**.
 
 ## Cloud Shell labs
 
@@ -36,9 +36,9 @@ Direct [markdown](https://github.com/tyayers/ai-gateway-labs/blob/main/public/TU
 ### 🔐 AI Gateway Security Lab (⏱ 15-30 min)
 
 In this lab you will:
-* Create a **Model Armor** template and add it to our AI proxies.
-* Add **Sensitive Data Protection** PII data masking feature to our AI proxies.
-* Test the AI proxy endpoints with malicious prompts.
+* Create a **Model Armor** template and add it to your AI proxies.
+* Add **Sensitive Data Protection** PII data masking feature to your AI proxies.
+* Test the AI proxy endpoints with malicious prompts and verify that the prompts are blocked.
 * Test the AI proxy endpoints with PII personal data.
 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://ssh.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/tyayers/ai-gateway-labs&cloudshell_git_branch=main&cloudshell_workspace=.&cloudshell_tutorial=public/TUTORIAL_SECURITY.md)
@@ -50,10 +50,11 @@ Direct [markdown](https://github.com/tyayers/ai-gateway-labs/blob/main/public/TU
 ### 🛠 AI Gateway Tools Lab (⏱ 15-30 min)
 
 In this lab you will:
-* Create **MCP proxies** to existing GCP MCP endpoints in your Google Cloud project, such as BigQuery.  
-* Add **tool filters** to only grant access to certain tools through Product rules.  
-* Create a **REST-MCP translation proxy** to convert an existing REST endpoint to MCP.  
-* Observe MCP tool access in analytics and logs.
+* Deploy a **REST Product Catalog** proxy to be used as an **API tool**.  
+* View the **API Hub** models & tools catalog with all of the deployed proxies.  
+* Create an **Apigee MCP Discovery Proxy** that adds an MCP transcription endpoint with mapping to the **REST Product Catalog** service, and test in **MCP Inspector** or in the terminal.  
+* Create an **MCP Proxy** to the existing **BigQuery MCP service**, adding **authorization & tool validation** to the proxy.  
+* Observe MCP tool analytics in the Apigee dashboards, Google Cloud logs & monitoring.
 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://ssh.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/tyayers/ai-gateway-labs&cloudshell_git_branch=main&cloudshell_workspace=.&cloudshell_tutorial=public/TUTORIAL_TOOLS.md)
 

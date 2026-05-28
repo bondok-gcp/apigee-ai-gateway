@@ -62,7 +62,7 @@ Let's deploy an **Apigee proxy** to the REST service that enforces the **OpenAPI
 Run this command to deploy the **proxy** to your **Apigee environment**:
 
 ```sh
-aft REST-Proxy.yaml -o "$GOOGLE_CLOUD_PROJECT:REST-$UNIQUE_NAME-Product:$APIGEE_ENVIRONMENT" -p "BasePath=/${UNIQUE_NAME,,}-catalog"
+aft REST-Product.yaml -o "$GOOGLE_CLOUD_PROJECT:REST-$UNIQUE_NAME-Product:$APIGEE_ENVIRONMENT" -p "BasePath=/${UNIQUE_NAME,,}-catalog"
 ```
 
 Open the **[Apigee proxies view](https://console.cloud.google.com/apigee/proxies)** and click on your proxy, wait for the deployment to complete, and then start a **Debug session**.
@@ -75,7 +75,7 @@ curl "https://$APIGEE_HOST/${UNIQUE_NAME,,}-catalog/products"
 
 You should get product data back. Try making some **invalid calls** and see how the calls are rejected by the **proxy** validation logic, which you can see in the debug trace. 
 
-## Add REST-to-MCP Tool
+## Add REST-to-MCP Proxy
 
 > [!IMPORTANT]
 > If you are in a group, only one person should do the following steps to create the MCP discovery proxy.
@@ -123,6 +123,60 @@ You should also see the **/mcp requests** in the debug trace of the proxy.
 
 [![MCP debug](https://amalbagee.web.app/apigee/mcp-debug1.png)](https://amalbagee.web.app/apigee/mcp-debug1.png)
 
-## Add BigQuery MCP Tool
+## Add BigQuery MCP Proxy
 
 Now let's deploy a **proxy** to the [BigQuery MCP target](https://docs.cloud.google.com/bigquery/docs/use-bigquery-mcp) to show how to add policies and governance to direct MCP proxies and targets.
+
+Use this command to deploy the **MCP-BigQuery** proxy to Apigee:
+
+```sh
+aft MCP-BigQuery.yaml -o "$GOOGLE_CLOUD_PROJECT:MCP-$UNIQUE_NAME-BigQuery:$APIGEE_ENVIRONMENT:$PROXY_SA" -p "BasePath=/${UNIQUE_NAME,,}-bigquery"
+```
+
+Refresh the [API proxies](https://console.cloud.google.com/apigee/proxies) list to see the new **MCP BigQuery** proxy.
+
+Run this command to create an **app and API key** to access the MCP tool.
+
+```sh
+source ./sh/script_bigquery_key.sh
+```
+
+Open the [API products](https://console.cloud.google.com/apigee/apiproducts) list to see the new product. 
+
+Start a debug session in your **MCP-BigQuery** proxy, and try connecting to the new **endpoint** with your API key using either [MCP Inspector](https://github.com/modelcontextprotocol/inspector) or calling directly.
+
+Let's do a lookup on the [Cymbal Investments Synthetic Public Dataset](https://console.cloud.google.com/marketplace/product/cymbal/cymbal_investments) with a terminal call like this:
+
+```sh
+curl -X POST "https://$APIGEE_HOST/${UNIQUE_NAME,,}-bigquery/mcp" -H "x-api-key: $BIGQUERY_API_KEY" \
+  -H "Content-Type: application/json" \
+  --data-binary @- << EOF
+
+{
+  "jsonrpc": "2.0", 
+  "id":0,
+  "method": "tools/call",
+  "params": {
+    "name": "execute_sql_readonly",
+    "arguments": {
+      "projectId": "$GOOGLE_CLOUD_PROJECT",
+      "query": "SELECT * FROM bigquery-public-data.cymbal_investments.trade_capture_report LIMIT 10"
+    },
+    "_meta": {
+      "progressToken": 1
+    }
+  }
+}
+EOF
+```
+
+You should get a 10 records returned showing how our **MCP proxy authorization** can grant and manage user's access to target MCP services.
+
+* 📊 Open the [API Hub API insights](https://console.cloud.google.com/apigee/api-hub/api-insights) dashboard to see **API & MCP analytics** usage data.
+* 🎉 Navigate to the [API Hub Catalog](https://console.cloud.google.com/apigee/api-hub/apis) again and see how our catalog of **Models** and **Tools** has grown. 
+
+## Conclusion
+<walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
+
+🏆 Congratulations! You've successfully completed the **AI Gateway Tools Lab** on Google Cloud. Keep an eye out for more AI Gateway Labs, and let us know what you think!
+<walkthrough-inline-feedback></walkthrough-inline-feedback>
