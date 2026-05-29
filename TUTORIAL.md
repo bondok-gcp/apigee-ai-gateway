@@ -177,7 +177,7 @@ Now we will update the proxy with authorization, governance & analytics policies
 
 ![AI proxies governance](https://amalbagee.web.app/apigee/ai-proxies-gov1.png)
 
-The proxy definitions are YAML templates (see <walkthrough-editor-open-file filePath="AI-Proxy-Gemini.yaml">AI-Proxy-Gemini.yaml</walkthrough-editor-open-file> for an example), and see the [aft documentation](https://github.com/apigee/apigee-templater) for more information.
+The proxy definitions are YAML templates (see <walkthrough-editor-open-file filePath="./templates/AI-Proxy-Gemini.yaml">AI-Proxy-Gemini.yaml</walkthrough-editor-open-file> for an example), and see the [aft documentation](https://github.com/apigee/apigee-templater) for more information.
 
 Deploy the AI proxy templates:
 
