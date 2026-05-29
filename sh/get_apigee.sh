@@ -14,6 +14,12 @@
 
 # get environment variables
 echo "Your GOOGLE_CLOUD_PROJECT: $GOOGLE_CLOUD_PROJECT"
+
+# install aft, if not already installed
+if ! aft -v | grep -q "Apigee Feature Templater"; then
+    npm i apigee-templater -g
+fi
+
 export APIGEE_CONFIG=$(aft -c $GOOGLE_CLOUD_PROJECT)
 export APIGEE_ENVIRONMENT=$(jq -r '.environmentGroups[0].attachments[0].environment' <<< "$APIGEE_CONFIG")
 echo "Your APIGEE_ENVIRONMENT: $APIGEE_ENVIRONMENT"

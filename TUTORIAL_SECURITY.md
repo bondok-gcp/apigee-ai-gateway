@@ -22,7 +22,7 @@ cp --update=none ./sh/env.sh .env
 
 ```sh
 source .env
-source ./sh/script_get_apigee.sh
+source ./sh/get_apigee.sh
 ```
 
 ### Install Tooling

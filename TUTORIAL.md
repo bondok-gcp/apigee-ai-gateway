@@ -78,8 +78,6 @@ npm i apigee-templater -g
 
 Because you are logged in with the **[Google CLoud CLI (gcloud)](https://cloud.google.com/sdk)**, all of our tool calls will automatically be authenticated with **[Application Default Credentials](https://docs.cloud.google.com/docs/authentication/application-default-credentials)**.
 
----
-
 ## Provision Apigee (if not already provisioned)
 
 <img src="https://iili.io/C9A7ZD7.png" />
@@ -109,8 +107,6 @@ cd ../..
 
 Provisioning takes around 20-30 minutes for all services to be enabled & deployed.
 
----
-
 ## Initialize Environment
 
 <img src="https://iili.io/C9AvqyN.png" />
@@ -119,12 +115,11 @@ After provisioning is finished, let's initialize the Apigee environment, enable 
 
 Take a look at the <walkthrough-editor-open-file filePath="./sh/script_initialize.sh">script_initialize.sh</walkthrough-editor-open-file> file to see the commands that are run.
 
-Run this command to initialize the environment:
+Run this command to **initialize** the environment:
 ```sh
 source ./sh/script_initialize.sh
+source ./sh/get_apigee.sh
 ```
-
----
 
 ## Test Gemini API
 

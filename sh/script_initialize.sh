@@ -66,9 +66,3 @@ gcloud iam service-accounts add-iam-policy-binding \
   ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com \
   --member="serviceAccount:service-$PROJECT_NUMBER@gcp-sa-apigee.iam.gserviceaccount.com" \
   --role="roles/iam.serviceAccountTokenCreator" --project $GOOGLE_CLOUD_PROJECT
-
-# get environment variables
-export APIGEE_CONFIG=$(aft -c $GOOGLE_CLOUD_PROJECT)
-export APIGEE_ENVIRONMENT=$(jq -r '.environmentGroups[0].attachments[0].environment' <<< "$APIGEE_CONFIG")
-export APIGEE_HOST=$(jq -r '.environmentGroups[0].hostnames[0]' <<< "$APIGEE_CONFIG")
-export PROXY_SA="ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com"
