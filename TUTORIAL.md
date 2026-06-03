@@ -275,7 +275,22 @@ curl -i -X POST "https://$APIGEE_HOST/${UNIQUE_NAME,,}-claude/v1/projects/$PROJE
 Now update Gemini to use Google Cloud Agent Platform (formally Vertex AI, can be changed back afterwards), as well as setting the Apigee proxy URL and key:
 
 ```sh
-jq '.security.auth.selectedType = "vertex-ai"' ~/.gemini/settings.json > tmp.json && mv tmp.json ~/.gemini/settings.json
+if [[ -f "~/.gemini/settings.json" ]]; then
+  cp ~/.gemini/settings.json ~/.gemini/settings.backup.json
+  jq '.security.auth.selectedType = "vertex-ai"' ~/.gemini/settings.json > tmp.json && mv tmp.json ~/.gemini/settings.json
+else
+  cat << 'EOF' > ~/.gemini/settings.json
+{
+  "security": {
+    "auth": {
+      "selectedType": "vertex-ai"
+    }
+  },
+  "selectedAuthType": "compute-default-credentials"
+}
+EOF
+fi
+
 export GOOGLE_VERTEX_BASE_URL="https://$APIGEE_HOST/${UNIQUE_NAME,,}-gemini"
 export GEMINI_CLI_CUSTOM_HEADERS="x-api-key: $API_KEY"
 ```
