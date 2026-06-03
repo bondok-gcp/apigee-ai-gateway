@@ -31,6 +31,9 @@ These [Google Cloud roles](https://docs.cloud.google.com/iam/docs/roles-permissi
 * Cloud KMS Admin (roles/cloudkms.admin)
 * Agent Platform Admin (roles/ml.admin)
 * Project IAM Admin (roles/resourcemanager.projectIamAdmin)
+* Cloud AI Companion User (roles/cloudaicompanion.user)
+* Service Account User (roles/iam.serviceAccountUser)
+* Model Armor Template Admin (roles/modelarmor.admin)
 
 ---
 
