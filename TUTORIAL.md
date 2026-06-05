@@ -15,8 +15,6 @@ We will be using several terms in these labs, so here are some definitions to ge
 
 Let's go!
 
----
-
 ## Prerequisites
 
 The only prerequisite for this lab is that you have a Google Cloud project to use.
@@ -50,8 +48,7 @@ Run this script to collect the information and set the variables:
 source ./sh/initialize.sh
 ```
 
-> [!TIP]
-> In case you want to set your own network, subnet or DRZ configuration, <walkthrough-editor-open-file filePath="./.env">edit</walkthrough-editor-open-file> the **.env** file and set the **Optional Variables** accordingly, and then run `source .env` to reload.
+<walkthrough-notification-menu-icon></walkthrough-notification-menu-icon> In case you want to set your own network, subnet or DRZ configuration, <walkthrough-editor-open-file filePath="./.env">edit</walkthrough-editor-open-file> the **.env** file and set the **Optional Variables** accordingly, and then run `source .env` to reload.
 
 <walkthrough-footnote>Because you are logged in with the **[Google CLoud CLI (gcloud)](https://cloud.google.com/sdk)**, all of our tool calls will automatically be authenticated with **[Application Default Credentials](https://docs.cloud.google.com/docs/authentication/application-default-credentials)**.</walkthrough-footnote>
 
