@@ -28,7 +28,6 @@ echo "export GOOGLE_CLOUD_PROJECT=$project_id" > .env
 echo "export GOOGLE_CLOUD_LOCATION=$region" >> .env
 echo "export APIGEE_TYPE=$apigee_type" >> .env
 echo >> .env;
-echo >> .env;
 echo "# Optional Variables" >> .env;
 echo "export UNIQUE_NAME=\$USER" >> .env
 echo "export APIGEE_VPC_NAME=" >> .env
