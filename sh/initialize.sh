@@ -12,14 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-read -p "Enter your Google Cloud Project Id: " project_id
-read -p "Enter your Google Cloud Region: " region
-read -e -i "EVALUATION" -p "Enter your Apigee deployment type (EVALUATION, PAYG, SUBSCRIPTION): " apigee_type
+if [ -f "../.env" ]; then
+  source ../.env
+fi
+
+if [ -z "$APIGEE_TYPE" ]; then
+  APIGEE_TYPE=EVALUATION
+fi
+
+read -e -i "$GOOGLE_CLOUD_PROJECT" -p "Enter your Google Cloud Project Id: " project_id
+read -e -i "$GOOGLE_CLOUD_LOCATION" -p "Enter your Google Cloud Region: " region
+read -e -i "$APIGEE_TYPE" -p "Enter your Apigee deployment type (EVALUATION, PAYG, SUBSCRIPTION): " apigee_type
 
 echo "export GOOGLE_CLOUD_PROJECT=$project_id" > .env
 echo "export GOOGLE_CLOUD_LOCATION=$region" >> .env
 echo "export APIGEE_TYPE=$apigee_type" >> .env
-echo "\n\n# Optional Variables" >> .env;
+echo >> .env;
+echo >> .env;
+echo "# Optional Variables" >> .env;
 echo "export UNIQUE_NAME=\$USER" >> .env
 echo "export APIGEE_VPC_NAME=" >> .env
 echo "export APIGEE_SUBNET_NAME=" >> .env
