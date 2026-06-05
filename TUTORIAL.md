@@ -258,11 +258,11 @@ Start a **debug session** in the Apigee console again, and use **Gemini CLI** to
 ![Gemini CLI](https://amalbagee.web.app/gemini/gemini-cli1.png)
 
 ```sh
-gemini -p "What does the constellation Leo look like? "
+gemini -p "What does the constellation Leo look like?"
 ```
 
 ```sh
-gemini -p "What does the constellation Scorpio look like? "
+gemini -p "What does the constellation Scorpio look like?"
 ```
 
 You should see debug traces of the conversations in Apigee, with each step of the policy & logic checks, as well as each frame of the SSE streaming responses to the CLI client.
