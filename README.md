@@ -12,7 +12,7 @@ These labs guide you through creating an AI Gateway on Google Cloud leveraging [
 
 ## Prerequisites
 To run these labs you will need:
-* A pre-created [Google Cloud sandbox project](https://docs.cloud.google.com/resource-manager/docs/creating-managing-projects) with either the role **roles/owner**, or these roles assigned: **apigee.admin, apihub.admin, serviceusage.serviceUsageAdmin, iam.serviceAccountAdmin, compute.admin, compute.networkAdmin, cloudkms.admin, ml.admin**.
+* A pre-created [Google Cloud sandbox project](https://docs.cloud.google.com/resource-manager/docs/creating-managing-projects) with either the role **roles/owner**, or these roles assigned: **apigee.admin, apihub.admin, serviceusage.serviceUsageAdmin, iam.serviceAccountAdmin, iam.serviceAccountUser, compute.admin, compute.networkAdmin, cloudkms.admin, ml.admin, cloudaicompanion.user, modelarmor.admin**.
 
 ## Cloud Shell labs
 
