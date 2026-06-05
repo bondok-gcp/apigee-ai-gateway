@@ -12,6 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+read -p "Enter your Google Cloud Project Id: " project_id
+read -p "Enter your Google Cloud Region: " region
+read -e -i "EVALUATION" -p "Enter your Apigee deployment type (EVALUATION, PAYG, SUBSCRIPTION): " apigee_type
+
+echo "export GOOGLE_CLOUD_PROJECT=$project_id" > .env
+echo "export GOOGLE_CLOUD_LOCATION=$region" >> .env
+echo "export APIGEE_TYPE=$apigee_type" >> .env
+
+echo "\n# Optional Variables";
+echo "export UNIQUE_NAME=$USER" >> .env
+echo "export APIGEE_VPC_NAME=" >> .env
+echo "export APIGEE_SUBNET_NAME=" >> .env
+echo "export APIGEE_DRZ_LOCATION=" >> .env
+
 # create data collectors
 curl -X POST "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJECT/datacollectors" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H 'Content-Type: application/json; charset=utf-8' \
 -d '{"name": "dc_ai_model", "description": "Model name", "type": "STRING"}'

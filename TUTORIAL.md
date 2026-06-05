@@ -5,6 +5,8 @@
 ---
 This tutorial guides you through provisioning an **AI Gateway** in your Google Cloud project, and then creating AI proxies to add **governance & analytics** at the gateway level to agentic tools like **Gemini CLI**, **Claude Code**, or any other AI application.
 
+<walkthrough-tutorial-duration duration="30-60 minutes"></walkthrough-tutorial-duration>
+
 ### Definitions
 We will be using several terms in these labs, so here are some definitions to get started:
 
@@ -41,45 +43,18 @@ These [Google Cloud roles](https://docs.cloud.google.com/iam/docs/roles-permissi
 
 <img src="https://iili.io/C9AvqyN.png" />
 
-You will need to set these environment variables to run this lab:
+To begin you need to configure your environment with your Google Cloud Project, region, and other details. 
 
-* **GOOGLE_CLOUD_PROJECT**: Your Google Cloud project id
-* **GOOGLE_CLOUD_LOCATION**: Your Google Cloud region for the Apigee region
-* **APIGEE_TYPE**: The type of Apigee deployment (either EVALUATION (valid for 60 days), PAYG (consumption pricing, path to production), or SUBSCRIPTION (fixed pricing)) |
-
-Additionally these **optional** variables can be set if you want to use an existing VPC and subnet, or use a DRZ data residency location:
-
-* **APIGEE_VPC_NAME**: The name of your existing VPC to use for Apigee
-* **APIGEE_SUBNET_NAME**: The name of your existing VPC subnet to use for Apigee
-* **APIGEE_DRZ_LOCATION**: The optional DRZ data residency location for Apigee data (US, EU or IN)
-
-### Set Environment Variables
-
-1. **Copy** the `./sh/env.sh` file to a local `.env` file by running this command.
+Run this script to collect the information and set the variables:
 
 ```sh
-cp --update=none ./sh/env.sh .env
+source ./sh/initialize.sh
 ```
 
-2. **Click**  <walkthrough-editor-open-file filePath=".env">here</walkthrough-editor-open-file> to open the `.env` file in the editor.
+> [!TIP]
+> In case you want to set your own network, subnet or DRZ configuration, <walkthrough-editor-open-file filePath="./.env">edit</walkthrough-editor-open-file> the **.env** file and set the **Optional Variables** accordingly, and then run `source .env` to reload.
 
-3. After **saving** your changes, load the variables by running this command:
-
-```sh
-source .env
-```
-
-### Install Tooling
-
-<img src="https://iili.io/C9AvqyN.png" />
-
-This lab uses the [aft](https://github.com/apigee/apigee-templater) tool to automate proxy deployment, install with this command:
-
-```sh
-npm i apigee-templater -g
-```
-
-Because you are logged in with the **[Google CLoud CLI (gcloud)](https://cloud.google.com/sdk)**, all of our tool calls will automatically be authenticated with **[Application Default Credentials](https://docs.cloud.google.com/docs/authentication/application-default-credentials)**.
+<walkthrough-footnote>Because you are logged in with the **[Google CLoud CLI (gcloud)](https://cloud.google.com/sdk)**, all of our tool calls will automatically be authenticated with **[Application Default Credentials](https://docs.cloud.google.com/docs/authentication/application-default-credentials)**.</walkthrough-footnote>
 
 ## Provision Apigee (if not already provisioned)
 
@@ -110,7 +85,7 @@ cd ../..
 
 Provisioning takes around 20-30 minutes for all services to be enabled & deployed.
 
-## Initialize Environment
+## Load Environment Information
 
 <img src="https://iili.io/C9AvqyN.png" />
 
@@ -118,9 +93,8 @@ After provisioning is finished, let's initialize the Apigee environment, enable 
 
 Take a look at the <walkthrough-editor-open-file filePath="./sh/script_initialize.sh">script_initialize.sh</walkthrough-editor-open-file> file to see the commands that are run.
 
-Run this command to **initialize** the environment:
+Run this command to **load** the environment information:
 ```sh
-source ./sh/script_initialize.sh
 source ./sh/get_apigee.sh
 ```
 
@@ -278,22 +252,7 @@ curl -i -X POST "https://$APIGEE_HOST/${UNIQUE_NAME,,}-claude/v1/projects/$PROJE
 Now update Gemini to use Google Cloud Agent Platform (formally Vertex AI, can be changed back afterwards), as well as setting the Apigee proxy URL and key:
 
 ```sh
-if [[ -f "~/.gemini/settings.json" ]]; then
-  cp ~/.gemini/settings.json ~/.gemini/settings.backup.json
-  jq '.security.auth.selectedType = "vertex-ai"' ~/.gemini/settings.json > tmp.json && mv tmp.json ~/.gemini/settings.json
-else
-  cat << 'EOF' > ~/.gemini/settings.json
-{
-  "security": {
-    "auth": {
-      "selectedType": "vertex-ai"
-    }
-  },
-  "selectedAuthType": "compute-default-credentials"
-}
-EOF
-fi
-
+source ./sh/set_gemini.sh
 export GOOGLE_VERTEX_BASE_URL="https://$APIGEE_HOST/${UNIQUE_NAME,,}-gemini"
 export GEMINI_CLI_CUSTOM_HEADERS="x-api-key: $API_KEY"
 ```
