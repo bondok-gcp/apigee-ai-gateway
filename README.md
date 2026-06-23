@@ -29,7 +29,7 @@ In this lab you will:
 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://ssh.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/gcp-samples/ai-gateway-labs&cloudshell_git_branch=main&cloudshell_workspace=.&cloudshell_tutorial=TUTORIAL.md)
 
-Direct [markdown](https://github.com/tyayers/ai-gateway-labs/blob/main/TUTORIAL.md) link.
+Direct [markdown](https://github.com/gcp-samples/ai-gateway-labs/blob/main/TUTORIAL.md) link.
 
 ---
 
@@ -43,7 +43,7 @@ In this lab you will:
 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://ssh.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/gcp-samples/ai-gateway-labs&cloudshell_git_branch=main&cloudshell_workspace=.&cloudshell_tutorial=TUTORIAL_SECURITY.md)
 
-Direct [markdown](https://github.com/tyayers/ai-gateway-labs/blob/main/TUTORIAL_SECURITY.md) link.
+Direct [markdown](https://github.com/gcp-samples/ai-gateway-labs/blob/main/TUTORIAL_SECURITY.md) link.
 
 ---
 
@@ -58,4 +58,4 @@ In this lab you will:
 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://ssh.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/gcp-samples/ai-gateway-labs&cloudshell_git_branch=main&cloudshell_workspace=.&cloudshell_tutorial=TUTORIAL_TOOLS.md)
 
-Direct [markdown](https://github.com/tyayers/ai-gateway-labs/blob/main/TUTORIAL_TOOLS.md) link.
+Direct [markdown](https://github.com/gcp-samples/ai-gateway-labs/blob/main/TUTORIAL_TOOLS.md) link.

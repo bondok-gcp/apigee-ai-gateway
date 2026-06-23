@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [ -f "../.env" ]; then
-  source ../.env
+if [ -f ".env" ]; then
+  source .env
 fi
 
 if [ -z "$APIGEE_TYPE" ]; then
@@ -58,7 +58,7 @@ gcloud services enable cloudaicompanion.googleapis.com --project $GOOGLE_CLOUD_P
 gcloud services enable modelarmor.googleapis.com --project $GOOGLE_CLOUD_PROJECT
 gcloud services enable dlp.googleapis.com --project $GOOGLE_CLOUD_PROJECT
 gcloud iam service-accounts create "ai-service" --project="$GOOGLE_CLOUD_PROJECT" \
-    --description="AI service account" \
+    --description="AI Service Account" \
     --display-name="AI Service Account"
 sleep 10
 # give permissions

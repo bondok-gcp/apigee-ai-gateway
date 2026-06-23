@@ -159,7 +159,7 @@ aft ./templates/AI-Proxy-Gemini.yaml -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-G
 aft ./templates/AI-Proxy-DeepSeek.yaml -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-DeepSeek:$APIGEE_ENVIRONMENT:$PROXY_SA" -p "ModelBasePath=/${UNIQUE_NAME,,}-deepseek"
 aft ./templates/AI-Proxy-Qwen.yaml -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Qwen:$APIGEE_ENVIRONMENT:$PROXY_SA" -p "ModelBasePath=/${UNIQUE_NAME,,}-qwen"
 aft ./templates/AI-Proxy-Claude.yaml -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Claude:$APIGEE_ENVIRONMENT:$PROXY_SA" -p "ModelBasePath=/${UNIQUE_NAME,,}-claude"
-aft -i ./templates/AI-Analytics.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Analytics:$APIGEE_ENVIRONMENT
+aft ./templates/AI-Analytics.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Analytics:$APIGEE_ENVIRONMENT
 ```
 
 Now let's create a **product** & **subscription** to the **AI-Gemini** proxy. [Products](https://docs.cloud.google.com/apigee/docs/api-platform/publish/what-api-product) and [Subscriptions](https://docs.cloud.google.com/apigee/docs/api-platform/publish/creating-apps-surface-your-api) allow user authorization and detailed quotas on things like number of tokens, calls or specific models, paths or operations.
@@ -205,8 +205,8 @@ You should get a **Model not allowed** response.
 Now let's do a call to a non-existent Gemini model, and force a model failver to the configured failover model in the proxy, **gemini-flash-latest**.
 
 ```sh
-curl -i -X POST "https://$APIGEE_HOST/${UNIQUE_NAME,,}-gemini/v1beta1/projects/$GOOGLE_CLOUD_PROJECT/locations/global/endpoints/openapi/chat/completions" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
--d '{"model": "google/gemini-5.1-pro", "stream": false, "messages":  [{"role": "user", "content": "What does the Orion constellation look like?"}]}'
+curl -L -X POST "https://$APIGEE_HOST/${UNIQUE_NAME,,}-gemini/v1/projects/$GOOGLE_CLOUD_PROJECT/locations/$GOOGLE_CLOUD_LOCATION/publishers/google/models/gemini-5.1-pro:generateContent" -H "x-api-key: $API_KEY" -H "Content-Type: application/json; charset=utf-8" \
+-d '{"contents": [{"role": "USER", "parts": [{"text": "What does the Orion constellation look like?"}]}]}'
 ```
 
 You should get a response from **google/gemini-flash-latest** since the requested model failed.
