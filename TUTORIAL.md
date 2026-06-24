@@ -159,7 +159,6 @@ aft ./templates/AI-Proxy-Gemini.yaml -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-G
 aft ./templates/AI-Proxy-DeepSeek.yaml -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-DeepSeek:$APIGEE_ENVIRONMENT:$PROXY_SA" -p "ModelBasePath=/${UNIQUE_NAME,,}-deepseek"
 aft ./templates/AI-Proxy-Qwen.yaml -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Qwen:$APIGEE_ENVIRONMENT:$PROXY_SA" -p "ModelBasePath=/${UNIQUE_NAME,,}-qwen"
 aft ./templates/AI-Proxy-Claude.yaml -o "$GOOGLE_CLOUD_PROJECT:AI-$UNIQUE_NAME-Claude:$APIGEE_ENVIRONMENT:$PROXY_SA" -p "ModelBasePath=/${UNIQUE_NAME,,}-claude"
-aft ./templates/AI-Analytics.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Analytics:$APIGEE_ENVIRONMENT
 ```
 
 Now let's create a **product** & **subscription** to the **AI-Gemini** proxy. [Products](https://docs.cloud.google.com/apigee/docs/api-platform/publish/what-api-product) and [Subscriptions](https://docs.cloud.google.com/apigee/docs/api-platform/publish/creating-apps-surface-your-api) allow user authorization and detailed quotas on things like number of tokens, calls or specific models, paths or operations.
