@@ -1,4 +1,6 @@
 # get environment variables
+source .env
+
 echo "Your GOOGLE_CLOUD_PROJECT: $GOOGLE_CLOUD_PROJECT"
 
 # install aft, if not already installed
