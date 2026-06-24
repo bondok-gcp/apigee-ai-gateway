@@ -72,7 +72,7 @@ These **optional parameters** can be added to the `apply` command to customize t
 
 Run these commands to provision, and type **yes** after reviewing the changes:
 ```sh
-source ./sh/script_tf_clean.sh
+source ./sh/tf_clean.sh
 cd tf/apigee
 terraform init
 terraform apply -var "project_id=$GOOGLE_CLOUD_PROJECT" -var "region=$GOOGLE_CLOUD_LOCATION" --var "apigee_type=$APIGEE_TYPE"
@@ -164,10 +164,10 @@ aft ./templates/AI-Analytics.yaml -o $GOOGLE_CLOUD_PROJECT:AI-Analytics:$APIGEE_
 
 Now let's create a **product** & **subscription** to the **AI-Gemini** proxy. [Products](https://docs.cloud.google.com/apigee/docs/api-platform/publish/what-api-product) and [Subscriptions](https://docs.cloud.google.com/apigee/docs/api-platform/publish/creating-apps-surface-your-api) allow user authorization and detailed quotas on things like number of tokens, calls or specific models, paths or operations.
 
-Take a look at the <walkthrough-editor-open-file filePath="./sh/script_register_key.sh">script_register_key.sh</walkthrough-editor-open-file> file, and then run the commands:
+Take a look at the <walkthrough-editor-open-file filePath="./sh/register_key.sh">register_key.sh</walkthrough-editor-open-file> file, and then run the commands:
 
 ```sh
-source ./sh/script_register_key.sh
+source ./sh/register_key.sh
 ```
 
 ---

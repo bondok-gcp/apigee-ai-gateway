@@ -49,21 +49,21 @@ parameters:
     description: Configuration input for OverrideModel
     default: ""
     examples:
-      - google/gemini-flash-latest
+      - deepseek-v3.2-maas
     maps: {}
   - name: DefaultModel
     displayName: DefaultModel
     description: Configuration input for DefaultModel
     default: ""
     examples:
-      - google/gemini-flash-latest
+      - deepseek-v3.2-maas
     maps: {}
   - name: FallbackModel
     displayName: FallbackModel
     description: Configuration input for FallbackModel
-    default: google/gemini-flash-latest
+    default: deepseek-v3.1-maas
     examples:
-      - google/gemini-flash-latest
+      - deepseek-v3.2-maas
     maps: {}
   - name: ServiceAccountAuth
     description: If a Google Cloud Service Account should be used in the proxy deployment, or not.

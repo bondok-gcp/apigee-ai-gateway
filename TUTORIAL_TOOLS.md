@@ -40,7 +40,7 @@ cd tf/hub
 terraform init
 terraform apply -var "project_id=$GOOGLE_CLOUD_PROJECT" -var "region=$GOOGLE_CLOUD_LOCATION"
 cd ../..
-source ./sh/script_hub_init.sh
+source ./sh/hub_init.sh
 ```
 
 Provisioning usually takes 10-15 minutes.
@@ -136,7 +136,7 @@ Refresh the [API proxies](https://console.cloud.google.com/apigee/proxies) list 
 Run this command to create an **app and API key** to access the MCP tool.
 
 ```sh
-source ./sh/script_bigquery_key.sh
+source ./sh/bigquery_key.sh
 ```
 
 Open the [API products](https://console.cloud.google.com/apigee/apiproducts) list to see the new product. 

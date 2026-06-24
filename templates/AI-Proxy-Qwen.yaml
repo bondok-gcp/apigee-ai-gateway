@@ -49,21 +49,21 @@ parameters:
     description: Configuration input for OverrideModel
     default: ""
     examples:
-      - google/gemini-flash-latest
+      - qwen3-next-80b-a3b-thinking-maas
     maps: {}
   - name: DefaultModel
     displayName: DefaultModel
     description: Configuration input for DefaultModel
     default: ""
     examples:
-      - google/gemini-flash-latest
+      - qwen3-next-80b-a3b-thinking-maas
     maps: {}
   - name: FallbackModel
     displayName: FallbackModel
     description: Configuration input for FallbackModel
-    default: google/gemini-flash-latest
+    default: qwen3-235b-a22b-instruct-2507-maas
     examples:
-      - google/gemini-flash-latest
+      - qwen3-235b-a22b-instruct-2507-maas
     maps: {}
   - name: ServiceAccountAuth
     description: If a Google Cloud Service Account should be used in the proxy deployment, or not.

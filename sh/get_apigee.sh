@@ -15,5 +15,5 @@ export APIGEE_HOST=$(jq -r '.environmentGroups[0].hostnames[0]' <<< "$APIGEE_CON
 echo "Your APIGEE_HOST: $APIGEE_HOST"
 export PROXY_SA="ai-service@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com"
 echo "Your Apigee proxy identity: $PROXY_SA"
-export API_KEY=$(curl "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJECT/developers/$UNIQUE_NAME-test@example.com/apps/AI%20$UNIQUE_NAME%20App" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" | jq --raw-output '.credentials[0].consumerKey')
+export API_KEY=$(curl "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJECT/developers/${UNIQUE_NAME,,}-test@example.com/apps/AI%20$UNIQUE_NAME%20App" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" | jq --raw-output '.credentials[0].consumerKey')
 echo "Your API key: $API_KEY"
