@@ -44,7 +44,7 @@ parameters:
     examples:
       - gemini-flash-latest
     maps: {}
-  - name: FallbackModel
+  - name: FailoverModel
     displayName: FallbackModel
     description: Configuration input for FallbackModel
     default: gemini-flash-latest

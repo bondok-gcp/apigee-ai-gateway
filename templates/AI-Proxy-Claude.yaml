@@ -58,9 +58,9 @@ parameters:
     examples:
       - claude-sonnet-4-6
     maps: {}
-  - name: FallbackModel
-    displayName: FallbackModel
-    description: Configuration input for FallbackModel
+  - name: FailoverModel
+    displayName: FailoverModel
+    description: Configuration input for FailoverModel
     default: claude-haiku-4-5
     examples:
       - claude-haiku-4-5

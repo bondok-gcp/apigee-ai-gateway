@@ -58,9 +58,9 @@ parameters:
     examples:
       - qwen3-next-80b-a3b-thinking-maas
     maps: {}
-  - name: FallbackModel
-    displayName: FallbackModel
-    description: Configuration input for FallbackModel
+  - name: FailoverModel
+    displayName: FailoverModel
+    description: Configuration input for FailoverModel
     default: qwen3-235b-a22b-instruct-2507-maas
     examples:
       - qwen3-235b-a22b-instruct-2507-maas
