@@ -16,7 +16,7 @@
 curl -X POST "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJECT/apiproducts" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H 'Content-Type: application/json; charset=utf-8' \
 --data-binary @- << EOF
 
-{"name": "BigQuery $UNIQUE_NAME Product", "displayName": "BigQuery $UNIQUE_NAME Product", "approvalType": "auto", "attributes": [{"name": "access", "value": "public" } ], "environments": ["dev"], "createdAt": "1778486511834", "lastModifiedAt": "1778486511834", "operationGroup": {"operationConfigs": [{"apiSource": "MCP-$UNIQUE_NAME-BigQuery", "operations": [{"resource": "/" } ], "quota": {} } ], "operationConfigType": "proxy" } }
+{"apiProduct": [{"name": "BigQuery $UNIQUE_NAME Product", "displayName": "BigQuery $UNIQUE_NAME Product", "approvalType": "auto", "attributes": [{"name": "access", "value": "public" } ], "environments": ["dev" ], "createdAt": "1783402429673", "lastModifiedAt": "1783403070072", "operationGroup": {"operationConfigType": "proxy" }, "payloadOperationGroup": {"operationConfigs": [{"apiSource": "MCP-$UNIQUE_NAME-BigQuery", "operations": [{"operation": "tools/list" } ], "quota": {} }, {"apiSource": "MCP-Core-BigQuery", "operations": [{"operation": "tools/call/execute_sql_readonly" } ], "quota": {"limit": "5", "interval": "1", "timeUnit": "minute" } } ] } } ]
 EOF
 
 # create test developer
