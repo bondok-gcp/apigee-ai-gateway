@@ -20,6 +20,10 @@ if [ -z "$APIGEE_TYPE" ]; then
   APIGEE_TYPE=EVALUATION
 fi
 
+if [ -z "$GOOGLE_CLOUD_LOCATION" ]; then
+  GOOGLE_CLOUD_LOCATION=europe-west1
+fi
+
 if [ -z "$UNIQUE_NAME" ]; then
   UNIQUE_NAME=$USER
 fi
