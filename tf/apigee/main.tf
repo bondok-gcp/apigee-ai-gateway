@@ -201,7 +201,9 @@ resource "google_apigee_organization" "apigee_org" {
       condition     = !((var.drz_location != null && var.drz_location != "") && var.apigee_type == "EVALUATION")
       error_message = "Apigee EVALUATION type cannot be used when a DRZ location (drz_location) is specified. Please use PAYG or SUBSCRIPTION instead."
     }
-    ignore_changes = [analytics_region]
+    ignore_changes = [
+      analytics_region,
+      api_consumer_data_location]
   }
 }
 
