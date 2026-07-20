@@ -84,4 +84,6 @@ steps:
     args:
       - '-c'
       - |
+        apt-get update && apt-get install -y jq
+        chmod +x ./sh/register_key.sh
         source ./sh/register_key.sh

@@ -220,6 +220,12 @@ resource "google_compute_region_network_endpoint_group" "apigee_psc_neg" {
   network_endpoint_type = "PRIVATE_SERVICE_CONNECT"
   psc_target_service    = google_apigee_instance.apigee.service_attachment
   network               = local.network_id
+  # ADD THIS BLOCK TO PREVENT FORCE-REPLACEMENT DRIFT
+  lifecycle {
+    ignore_changes = [
+      subnetwork,
+    ]
+  }
 }
 
 resource "google_compute_backend_service" "apigee_backend" {
