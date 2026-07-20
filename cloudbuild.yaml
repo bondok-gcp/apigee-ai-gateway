@@ -1,0 +1,52 @@
+# Set extended build timeout (1.5 hours) to account for Apigee Instance provisioning
+timeout: '5400s'
+
+options:
+  logging: GCS_ONLY
+logsBucket: 'gs://$PROJECT_ID-tfstate/build-logs'
+
+steps:
+  # ------------------------------------------------------------------
+  # STAGE 1: Provision Apigee Org, Instance, Network, and Environments
+  # ------------------------------------------------------------------
+  - name: 'hashicorp/terraform:1.6.0'
+    id: 'init-apigee-base'
+    dir: 'tf/apigee'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - 'terraform init -backend-config="bucket=${PROJECT_ID}-tfstate"'
+
+  - name: 'hashicorp/terraform:1.6.0'
+    id: 'apply-apigee-base'
+    dir: 'tf/apigee'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        terraform apply -auto-approve \
+          -var="project_id=${PROJECT_ID}" \
+          -var="region=us-central1"
+
+  # ------------------------------------------------------------------
+  # STAGE 2: Deploy Gemini & Claude AI Proxies, Products, and Developer Keys
+  # ------------------------------------------------------------------
+  - name: 'hashicorp/terraform:1.6.0'
+    id: 'init-apigee-proxies'
+    dir: 'tf/proxies'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - 'terraform init -backend-config="bucket=${PROJECT_ID}-tfstate"'
+
+  - name: 'hashicorp/terraform:1.6.0'
+    id: 'apply-apigee-proxies'
+    dir: 'tf/proxies'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        terraform apply -auto-approve \
+          -var="project_id=${PROJECT_ID}" \
+          -var="enable_gemini=true" \
+          -var="enable_claude=true"
