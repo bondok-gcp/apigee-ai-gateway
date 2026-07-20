@@ -73,6 +73,67 @@ locals {
     ? data.google_compute_subnetwork.existing_subnet[0].id
     : null
   )
+
+  data_collectors = {
+    dc_ai_model = {
+      description = "Model name"
+      type        = "STRING"
+    }
+    dc_ai_cost_center = {
+      description = "Model cost center"
+      type        = "STRING"
+    }
+    dc_ai_total_token_count = {
+      description = "Total token count"
+      type        = "INTEGER"
+    }
+    dc_ai_prompt_token_count = {
+      description = "Prompt token count"
+      type        = "INTEGER"
+    }
+    dc_ai_response_token_count = {
+      description = "Response token count"
+      type        = "INTEGER"
+    }
+    dc_ai_response_type = {
+      description = "Model response type"
+      type        = "STRING"
+    }
+    dc_ai_time_first_token = {
+      description = "Time to first token (ms)"
+      type        = "INTEGER"
+    }
+  }
+}
+
+data "external" "collector_check" {
+  for_each = local.data_collectors
+
+  program = ["bash", "-c", <<EOT
+    ACCESS_TOKEN=$(gcloud auth application-default print-access-token 2>/dev/null)
+    if [ -z "$ACCESS_TOKEN" ]; then
+      # If no token, return false to prevent blocking plan phase in headless/CI environments
+      echo '{"exists": "false"}'
+      exit 0
+    fi
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%%{http_code}" -X GET \
+      "https://apigee.googleapis.com/v1/organizations/${var.project_id}/datacollectors/${each.key}" \
+      -H "Authorization: Bearer $ACCESS_TOKEN")
+    if [ "$HTTP_STATUS" -eq 200 ]; then
+      echo '{"exists": "true"}'
+    else
+      echo '{"exists": "false"}'
+    fi
+  EOT
+  ]
+}
+
+locals {
+  # Filter map to exclude collectors that already exist on Apigee
+  collectors_to_create = {
+    for k, v in local.data_collectors : k => v
+    if data.external.collector_check[k].result["exists"] == "false"
+  }
 }
 
 provider "google" {
@@ -210,6 +271,28 @@ resource "google_apigee_envgroup_attachment" "dev_envgroup_attachment" {
 resource "google_apigee_instance_attachment" "dev_instance_attachment" {
   instance_id = google_apigee_instance.apigee.id
   environment = google_apigee_environment.dev_env.name
+}
+
+resource "google_apigee_data_collector" "collectors" {
+  for_each = local.collectors_to_create
+
+  org_id            = google_apigee_organization.apigee_org.id
+  data_collector_id = each.key
+  description       = each.value.description
+  type              = each.value.type
+}
+
+output "data_collectors" {
+  description = "The newly created Apigee Data Collectors (excludes already existing ones)."
+  value = {
+    for k, v in google_apigee_data_collector.collectors : k => {
+      id                = v.id
+      data_collector_id = v.data_collector_id
+      name              = v.name
+      description       = v.description
+      type              = v.type
+    }
+  }
 }
 
 output "apigee_endpoint_url" {
