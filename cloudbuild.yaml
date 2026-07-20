@@ -1,4 +1,3 @@
-# Set extended build timeout (1.5 hours) to account for Apigee Instance provisioning
 timeout: '5400s'
 
 options:
@@ -9,7 +8,7 @@ steps:
   # ------------------------------------------------------------------
   # STAGE 1: Provision Apigee Org, Instance, Network, and Environments
   # ------------------------------------------------------------------
-  - name: 'hashicorp/terraform:1.6.0'
+  - name: 'hashicorp/terraform:1.9'
     id: 'init-apigee-base'
     dir: 'tf/apigee'
     entrypoint: 'sh'
@@ -17,7 +16,7 @@ steps:
       - '-c'
       - 'terraform init -backend-config="bucket=${PROJECT_ID}-tfstate"'
 
-  - name: 'hashicorp/terraform:1.6.0'
+  - name: 'hashicorp/terraform:1.9'
     id: 'apply-apigee-base'
     dir: 'tf/apigee'
     entrypoint: 'sh'
@@ -31,7 +30,7 @@ steps:
   # ------------------------------------------------------------------
   # STAGE 2: Deploy Gemini & Claude AI Proxies, Products, and Developer Keys
   # ------------------------------------------------------------------
-  - name: 'hashicorp/terraform:1.6.0'
+  - name: 'hashicorp/terraform:1.9'
     id: 'init-apigee-proxies'
     dir: 'tf/proxies'
     entrypoint: 'sh'
@@ -39,7 +38,7 @@ steps:
       - '-c'
       - 'terraform init -backend-config="bucket=${PROJECT_ID}-tfstate"'
 
-  - name: 'hashicorp/terraform:1.6.0'
+  - name: 'hashicorp/terraform:1.9'
     id: 'apply-apigee-proxies'
     dir: 'tf/proxies'
     entrypoint: 'sh'
