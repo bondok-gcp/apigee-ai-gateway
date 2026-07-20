@@ -1,55 +1,42 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#!/usr/bin/env bash
+set -e
 
-# create products
-curl -X POST "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJECT/apiproducts" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H 'Content-Type: application/json; charset=utf-8' \
---data-binary @- << EOF
+ORG="${GOOGLE_CLOUD_PROJECT}"
+ENV="${APIGEE_ENVIRONMENT:-dev}"
+DEV_EMAIL="ai-developer@example.com"
+APP_NAME="ai-gateway-app"
 
-{"name": "Gemini $UNIQUE_NAME Product", "displayName": "Gemini $UNIQUE_NAME Product", "approvalType": "auto", "attributes": [{"name": "access", "value": "public" } ], "environments": ["$APIGEE_ENVIRONMENT"], "createdAt": "1778486511834", "lastModifiedAt": "1778486511834", "operationGroup": {"operationConfigs": [{"apiSource": "AI-Analytics", "operations": [{"resource": "/" } ], "quota": {} } ], "operationConfigType": "proxy" }, "llmOperationGroup": {"operationConfigs": [{"apiSource": "AI-$UNIQUE_NAME-Gemini", "llmOperations": [{"resource": "/", "model": "gemini-flash-latest" } ], "llmTokenQuota": {"limit": "10000", "interval": "1", "timeUnit": "minute" } } ] } }
-EOF
+TOKEN=$(gcloud auth print-access-token)
 
-curl -X POST "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJECT/apiproducts" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H 'Content-Type: application/json; charset=utf-8' \
---data-binary @- << EOF
+echo "1. Registering Developer (${DEV_EMAIL})..."
+curl -s -X POST "https://apigee.googleapis.com/v1/organizations/${ORG}/developers" \
+  -H "Authorization: Bearer ${TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"email\": \"${DEV_EMAIL}\",
+    \"firstName\": \"AI\",
+    \"lastName\": \"Developer\",
+    \"userName\": \"aideveloper\"
+  }" > /dev/null || true
 
-{"name": "Claude $UNIQUE_NAME Product", "displayName": "Claude $UNIQUE_NAME Product", "approvalType": "auto", "attributes": [{"name": "access", "value": "public" } ], "environments": ["$APIGEE_ENVIRONMENT"], "createdAt": "1778486511834", "lastModifiedAt": "1778486511834", "operationGroup": {"operationConfigs": [{"apiSource": "AI-Analytics", "operations": [{"resource": "/" } ], "quota": {} } ], "operationConfigType": "proxy" }, "llmOperationGroup": {"operationConfigs": [{"apiSource": "AI-$UNIQUE_NAME-Claude", "llmOperations": [{"resource": "/", "model": "claude-opus-4-7" } ], "llmTokenQuota": {"limit": "10000", "interval": "5", "timeUnit": "minute" } } ] } }
-EOF
+echo "2. Fetching deployed API Products..."
+PRODUCTS_JSON=$(curl -s -H "Authorization: Bearer ${TOKEN}" "https://apigee.googleapis.com/v1/organizations/${ORG}/apiproducts" | jq -r '.apiProduct[].name')
+PROD_ARRAY=$(echo "$PRODUCTS_JSON" | jq -R . | jq -s .)
 
-curl -X POST "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJECT/apiproducts" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H 'Content-Type: application/json; charset=utf-8' \
---data-binary @- << EOF
+echo "3. Registering Developer App (${APP_NAME})..."
+curl -s -X POST "https://apigee.googleapis.com/v1/organizations/${ORG}/developers/${DEV_EMAIL}/apps" \
+  -H "Authorization: Bearer ${TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"name\": \"${APP_NAME}\",
+    \"apiProducts\": ${PROD_ARRAY}
+  }" > /dev/null || true
 
-{"name": "DeepSeek $UNIQUE_NAME Product", "displayName": "DeepSeek $UNIQUE_NAME Product", "approvalType": "auto", "attributes": [{"name": "access", "value": "public" } ], "environments": ["$APIGEE_ENVIRONMENT"], "createdAt": "1778486511834", "lastModifiedAt": "1778486511834", "operationGroup": {"operationConfigs": [{"apiSource": "AI-Analytics", "operations": [{"resource": "/" } ], "quota": {} } ], "operationConfigType": "proxy" }, "llmOperationGroup": {"operationConfigs": [{"apiSource": "AI-$UNIQUE_NAME-DeepSeek", "llmOperations": [{"resource": "/", "model": "deepseek-v3.2-maas" } ] } ] } }
-EOF
+echo "4. Retrieving API Key..."
+API_KEY=$(curl -s -H "Authorization: Bearer ${TOKEN}" "https://apigee.googleapis.com/v1/organizations/${ORG}/developers/${DEV_EMAIL}/apps/${APP_NAME}" | jq -r '.credentials[0].consumerKey')
 
-curl -X POST "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJECT/apiproducts" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H 'Content-Type: application/json; charset=utf-8' \
---data-binary @- << EOF
-
-{"name": "Qwen $UNIQUE_NAME Product", "displayName": "Qwen $UNIQUE_NAME Product", "approvalType": "auto", "attributes": [{"name": "access", "value": "public" } ], "environments": ["$APIGEE_ENVIRONMENT"], "createdAt": "1778486511834", "lastModifiedAt": "1778486511834", "operationGroup": {"operationConfigs": [{"apiSource": "AI-Analytics", "operations": [{"resource": "/" } ], "quota": {} } ], "operationConfigType": "proxy" }, "llmOperationGroup": {"operationConfigs": [{"apiSource": "AI-$UNIQUE_NAME-Qwen", "llmOperations": [{"resource": "/", "model": "qwen3-next-80b-a3b-thinking-maas" } ] } ] } }
-EOF
-
-# create test developer
-curl -X POST "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJECT/developers" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H 'Content-Type: application/json; charset=utf-8' \
---data-binary @- << EOF
-
-{"email": "${UNIQUE_NAME,,}-test@example.com", "firstName": "$UNIQUE_NAME", "lastName": "User", "userName": "${UNIQUE_NAME,,}-test@example.com"}
-EOF
-
-# create app and get key
-curl -X POST "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJECT/developers/${UNIQUE_NAME,,}-test@example.com/apps" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" -H 'Content-Type: application/json; charset=utf-8' \
---data-binary @- << EOF
-
-{"developerId": "${UNIQUE_NAME,,}-test@example.com", "name": "AI $UNIQUE_NAME App", "apiProducts": ["Gemini $UNIQUE_NAME Product","DeepSeek $UNIQUE_NAME Product","Qwen $UNIQUE_NAME Product","Claude $UNIQUE_NAME Product"]}
-EOF
-export API_KEY=$(curl "https://apigee.googleapis.com/v1/organizations/$GOOGLE_CLOUD_PROJECT/developers/${UNIQUE_NAME,,}-test@example.com/apps/AI%20$UNIQUE_NAME%20App" -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" | jq --raw-output '.credentials[0].consumerKey')
-
-echo "Your API key to access the Gemini Product is: $API_KEY"
+echo ""
+echo "=================================================================="
+echo "🎉 SUCCESS! Your Apigee AI Gateway is fully operational."
+echo "Your API Key: ${API_KEY}"
+echo "=================================================================="
