@@ -6,46 +6,73 @@ logsBucket: 'gs://$PROJECT_ID-tfstate/build-logs'
 
 steps:
   # ------------------------------------------------------------------
-  # STAGE 1: Provision Apigee Org, Instance, Network, and Environments
+  # STAGE 0: Install Terraform Binary into Cloud Build Workspace
   # ------------------------------------------------------------------
-  - name: 'hashicorp/terraform:1.9'
-    id: 'init-apigee-base'
-    dir: 'tf/apigee'
-    entrypoint: 'sh'
-    args:
-      - '-c'
-      - 'terraform init -backend-config="bucket=${PROJECT_ID}-tfstate"'
-
-  - name: 'hashicorp/terraform:1.9'
-    id: 'apply-apigee-base'
-    dir: 'tf/apigee'
-    entrypoint: 'sh'
+  - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli:latest'
+    id: 'install-terraform'
+    entrypoint: 'bash'
     args:
       - '-c'
       - |
-        terraform apply -auto-approve \
+        apt-get update && apt-get install -y unzip
+        curl -sS https://releases.hashicorp.com/terraform/1.9.5/terraform_1.9.5_linux_amd64.zip -o terraform.zip
+        unzip -o terraform.zip
+        mv terraform /workspace/terraform
+        chmod +x /workspace/terraform
+
+  # ------------------------------------------------------------------
+  # STAGE 1: Provision Apigee Org, Instance, Network, and Environments
+  # ------------------------------------------------------------------
+  - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli:latest'
+    id: 'init-apigee-base'
+    dir: 'tf/apigee'
+    entrypoint: 'bash'
+    env:
+      - 'GOOGLE_PROJECT=$PROJECT_ID'
+      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
+    args:
+      - '-c'
+      - '/workspace/terraform init -backend-config="bucket=${PROJECT_ID}-tfstate"'
+
+  - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli:latest'
+    id: 'apply-apigee-base'
+    dir: 'tf/apigee'
+    entrypoint: 'bash'
+    env:
+      - 'GOOGLE_PROJECT=$PROJECT_ID'
+      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
+    args:
+      - '-c'
+      - |
+        /workspace/terraform apply -auto-approve \
           -var="project_id=${PROJECT_ID}" \
           -var="region=us-central1"
 
   # ------------------------------------------------------------------
   # STAGE 2: Deploy Gemini & Claude AI Proxies, Products, and Developer Keys
   # ------------------------------------------------------------------
-  - name: 'hashicorp/terraform:1.9'
+  - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli:latest'
     id: 'init-apigee-proxies'
     dir: 'tf/proxies'
-    entrypoint: 'sh'
+    entrypoint: 'bash'
+    env:
+      - 'GOOGLE_PROJECT=$PROJECT_ID'
+      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
     args:
       - '-c'
-      - 'terraform init -backend-config="bucket=${PROJECT_ID}-tfstate"'
+      - '/workspace/terraform init -backend-config="bucket=${PROJECT_ID}-tfstate"'
 
-  - name: 'hashicorp/terraform:1.9'
+  - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli:latest'
     id: 'apply-apigee-proxies'
     dir: 'tf/proxies'
-    entrypoint: 'sh'
+    entrypoint: 'bash'
+    env:
+      - 'GOOGLE_PROJECT=$PROJECT_ID'
+      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
     args:
       - '-c'
       - |
-        terraform apply -auto-approve \
+        /workspace/terraform apply -auto-approve \
           -var="project_id=${PROJECT_ID}" \
           -var="enable_gemini=true" \
           -var="enable_claude=true"
