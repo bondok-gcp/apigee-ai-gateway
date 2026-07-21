@@ -48,7 +48,7 @@ steps:
           -var="project_id=${PROJECT_ID}" \
           -var="region=us-central1"
 
-  # ------------------------------------------------------------------
+ # ------------------------------------------------------------------
   # STAGE 2: Deploy Gemini & Claude AI Proxies via Apigee Templater
   # ------------------------------------------------------------------
   - name: 'node:20'
@@ -60,18 +60,19 @@ steps:
     args:
       - '-c'
       - |
+        set -e
         npm install -g apigee-templater
         
         echo "Deploying Gemini AI Proxy..."
-        aft ./templates/AI-Proxy-Gemini.yaml \
+        aft -i ./templates/AI-Proxy-Gemini.yaml \
           -o "${PROJECT_ID}:AI-Gemini:dev" \
           -p "ModelBasePath=/gemini"
           
         echo "Deploying Claude AI Proxy..."
-        aft ./templates/AI-Proxy-Claude.yaml \
+        aft -i ./templates/AI-Proxy-Claude.yaml \
           -o "${PROJECT_ID}:AI-Claude:dev" \
           -p "ModelBasePath=/claude"
-
+          
   # ------------------------------------------------------------------
   # STAGE 3: Register API Products, Developer App, & API Key
   # ------------------------------------------------------------------
