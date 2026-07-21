@@ -48,7 +48,7 @@ steps:
           -var="project_id=${PROJECT_ID}" \
           -var="region=us-central1"
 
-    # ------------------------------------------------------------------
+  # ------------------------------------------------------------------
   # STAGE 2: Deploy Gemini & Claude AI Proxies via Apigee Templater
   # ------------------------------------------------------------------
   - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli:latest'
@@ -63,7 +63,7 @@ steps:
         npm install -g apigee-templater
         
         # Use your highly-restricted runtime service account!
-        export APIGEE_SA="apigee-ai-runtime@${PROJECT_ID}.iam.gserviceaccount.com"
+        export APIGEE_SA="apigee-runtime@${PROJECT_ID}.iam.gserviceaccount.com"
         export TOKEN=$(gcloud auth print-access-token)
         
         echo "====================================="
