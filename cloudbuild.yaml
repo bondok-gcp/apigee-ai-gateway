@@ -51,12 +51,12 @@ steps:
   # ------------------------------------------------------------------
   # STAGE 2: Deploy Gemini & Claude AI Proxies via Apigee Templater
   # ------------------------------------------------------------------
+  # ------------------------------------------------------------------
+  # STAGE 2: Deploy Gemini & Claude AI Proxies via Apigee Templater
+  # ------------------------------------------------------------------
   - name: 'node:20'
     id: 'deploy-ai-proxies'
     entrypoint: 'bash'
-    env:
-      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
-      - 'APIGEE_ENVIRONMENT=dev'
     args:
       - '-c'
       - |
@@ -65,14 +65,13 @@ steps:
         
         echo "Deploying Gemini AI Proxy..."
         aft -i ./templates/AI-Proxy-Gemini.yaml \
-          -o "${PROJECT_ID}:AI-Gemini:${APIGEE_ENVIRONMENT}" \
+          -o "${PROJECT_ID}:AI-Gemini:dev" \
           -p "ModelBasePath=/gemini"
           
         echo "Deploying Claude AI Proxy..."
         aft -i ./templates/AI-Proxy-Claude.yaml \
-          -o "${PROJECT_ID}:AI-Claude:${APIGEE_ENVIRONMENT}" \
+          -o "${PROJECT_ID}:AI-Claude:dev" \
           -p "ModelBasePath=/claude"
-          
   # ------------------------------------------------------------------
   # STAGE 3: Register API Products, Developer App, & API Key
   # ------------------------------------------------------------------
