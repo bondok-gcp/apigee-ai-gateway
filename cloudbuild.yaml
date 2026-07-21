@@ -48,7 +48,7 @@ steps:
           -var="project_id=${PROJECT_ID}" \
           -var="region=us-central1"
 
-  # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
   # STAGE 2: Deploy Gemini & Claude AI Proxies via Apigee Templater
   # ------------------------------------------------------------------
   - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli:latest'
@@ -58,26 +58,62 @@ steps:
       - '-c'
       - |
         set -e
-        apt-get update && apt-get install -y nodejs npm
+        # Ensure jq is installed to parse API responses
+        apt-get update && apt-get install -y nodejs npm jq
         npm install -g apigee-templater
         
-        # Define the Runtime Service Account
-        export APIGEE_SA="apigee-runtime@${PROJECT_ID}.iam.gserviceaccount.com"
+        # Use your highly-restricted runtime service account!
+        export APIGEE_SA="apigee-ai-runtime@${PROJECT_ID}.iam.gserviceaccount.com"
+        export TOKEN=$(gcloud auth print-access-token)
         
-        echo "Deploying Gemini AI Proxy..."
-        # Note the double dollar sign on $${APIGEE_SA} to escape Cloud Build substitution
+        echo "====================================="
+        echo "Deploying Gemini AI Proxy"
+        echo "====================================="
+        # 1. Generate the Zip Bundle Locally
         script -q -e -c "aft -i ./templates/AI-Proxy-Gemini.yaml \
-          -o '${PROJECT_ID}:AI-Gemini:dev' \
-          -s '$${APIGEE_SA}' \
-          -t '$(gcloud auth print-access-token)' \
+          -o ./AI-Gemini.zip \
           -p 'ModelBasePath=/gemini'" /dev/null
           
-        echo "Deploying Claude AI Proxy..."
+        # 2. Import the Bundle to Apigee
+        echo "Importing Gemini Bundle to Apigee..."
+        GEMINI_RES=$(curl -s -X POST "https://apigee.googleapis.com/v1/organizations/${PROJECT_ID}/apis?action=import&name=AI-Gemini" \
+          -H "Authorization: Bearer $${TOKEN}" \
+          -F "file=@./AI-Gemini.zip")
+          
+        REV_GEMINI=$(echo "$${GEMINI_RES}" | jq -r .revision)
+        
+        # 3. Deploy the Revision with the Service Account attached
+        echo "Deploying Gemini Revision $${REV_GEMINI} with SA..."
+        DEPLOY_GEM=$(curl -s -X POST "https://apigee.googleapis.com/v1/organizations/${PROJECT_ID}/environments/dev/apis/AI-Gemini/revisions/$${REV_GEMINI}/deployments?serviceAccount=$${APIGEE_SA}" \
+          -H "Authorization: Bearer $${TOKEN}")
+        
+        echo "$${DEPLOY_GEM}"
+        if echo "$${DEPLOY_GEM}" | grep -q '"error"'; then exit 1; fi
+
+        echo "====================================="
+        echo "Deploying Claude AI Proxy"
+        echo "====================================="
+        # 1. Generate the Zip Bundle Locally
         script -q -e -c "aft -i ./templates/AI-Proxy-Claude.yaml \
-          -o '${PROJECT_ID}:AI-Claude:dev' \
-          -s '$${APIGEE_SA}' \
-          -t '$(gcloud auth print-access-token)' \
+          -o ./AI-Claude.zip \
           -p 'ModelBasePath=/claude'" /dev/null
+          
+        # 2. Import the Bundle to Apigee
+        echo "Importing Claude Bundle to Apigee..."
+        CLAUDE_RES=$(curl -s -X POST "https://apigee.googleapis.com/v1/organizations/${PROJECT_ID}/apis?action=import&name=AI-Claude" \
+          -H "Authorization: Bearer $${TOKEN}" \
+          -F "file=@./AI-Claude.zip")
+          
+        REV_CLAUDE=$(echo "$${CLAUDE_RES}" | jq -r .revision)
+        
+        # 3. Deploy the Revision with the Service Account attached
+        echo "Deploying Claude Revision $${REV_CLAUDE} with SA..."
+        DEPLOY_CLA=$(curl -s -X POST "https://apigee.googleapis.com/v1/organizations/${PROJECT_ID}/environments/dev/apis/AI-Claude/revisions/$${REV_CLAUDE}/deployments?serviceAccount=$${APIGEE_SA}" \
+          -H "Authorization: Bearer $${TOKEN}")
+          
+        echo "$${DEPLOY_CLA}"
+        if echo "$${DEPLOY_CLA}" | grep -q '"error"'; then exit 1; fi
+
 
 
 
