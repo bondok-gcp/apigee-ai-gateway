@@ -37,7 +37,7 @@ variable "subnet" {
 }
 
 variable "drz_location" {
-  description = "The DRZ location to use for deploying Apigee, either US (United States), EU (Europeean Union) or IN (India), or empty for global."
+  description = "The DRZ location to use for deploying Apigee, either US (United States), EU (European Union) or IN (India), or empty for global."
   type        = string
   default     = null
 }
@@ -104,36 +104,8 @@ locals {
       type        = "INTEGER"
     }
   }
-}
 
-data "external" "collector_check" {
-  for_each = local.data_collectors
-
-  program = ["bash", "-c", <<EOT
-    ACCESS_TOKEN=$(gcloud auth application-default print-access-token 2>/dev/null)
-    if [ -z "$ACCESS_TOKEN" ]; then
-      # If no token, return false to prevent blocking plan phase in headless/CI environments
-      echo '{"exists": "false"}'
-      exit 0
-    fi
-    HTTP_STATUS=$(curl -s -o /dev/null -w "%%{http_code}" -X GET \
-      "https://apigee.googleapis.com/v1/organizations/${var.project_id}/datacollectors/${each.key}" \
-      -H "Authorization: Bearer $ACCESS_TOKEN")
-    if [ "$HTTP_STATUS" -eq 200 ]; then
-      echo '{"exists": "true"}'
-    else
-      echo '{"exists": "false"}'
-    fi
-  EOT
-  ]
-}
-
-locals {
-  # Filter map to exclude collectors that already exist on Apigee
-  collectors_to_create = {
-    for k, v in local.data_collectors : k => v
-    if data.external.collector_check[k].result["exists"] == "false"
-  }
+  collectors_to_create = local.data_collectors
 }
 
 provider "google" {
@@ -220,7 +192,6 @@ resource "google_compute_region_network_endpoint_group" "apigee_psc_neg" {
   network_endpoint_type = "PRIVATE_SERVICE_CONNECT"
   psc_target_service    = google_apigee_instance.apigee.service_attachment
   network               = local.network_id
-  # ADD THIS BLOCK TO PREVENT FORCE-REPLACEMENT DRIFT
   lifecycle {
     ignore_changes = [
       subnetwork,
@@ -291,7 +262,7 @@ resource "google_apigee_data_collector" "collectors" {
 }
 
 output "data_collectors" {
-  description = "The newly created Apigee Data Collectors (excludes already existing ones)."
+  description = "The newly created Apigee Data Collectors."
   value = {
     for k, v in google_apigee_data_collector.collectors : k => {
       id                = v.id
