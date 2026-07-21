@@ -48,7 +48,7 @@ steps:
           -var="project_id=${PROJECT_ID}" \
           -var="region=us-central1"
 
-  # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
   # STAGE 2: Deploy Gemini & Claude AI Proxies via Apigee Templater
   # ------------------------------------------------------------------
   - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli:latest'
@@ -61,13 +61,18 @@ steps:
         apt-get update && apt-get install -y nodejs npm
         npm install -g apigee-templater
         
-        TOKEN=$(gcloud auth print-access-token)
-        
         echo "Deploying Gemini AI Proxy..."
-        python3 -c "import pty, sys; sys.exit(pty.spawn(['aft', '-i', './templates/AI-Proxy-Gemini.yaml', '-o', '${PROJECT_ID}:AI-Gemini:dev', '-t', '${TOKEN}', '-p', 'ModelBasePath=/gemini']))"
-        
+        script -q -e -c "aft -i ./templates/AI-Proxy-Gemini.yaml \
+          -o '${PROJECT_ID}:AI-Gemini:dev' \
+          -t '$(gcloud auth print-access-token)' \
+          -p 'ModelBasePath=/gemini'" /dev/null
+          
         echo "Deploying Claude AI Proxy..."
-        python3 -c "import pty, sys; sys.exit(pty.spawn(['aft', '-i', './templates/AI-Proxy-Claude.yaml', '-o', '${PROJECT_ID}:AI-Claude:dev', '-t', '${TOKEN}', '-p', 'ModelBasePath=/claude']))"
+        script -q -e -c "aft -i ./templates/AI-Proxy-Claude.yaml \
+          -o '${PROJECT_ID}:AI-Claude:dev' \
+          -t '$(gcloud auth print-access-token)' \
+          -p 'ModelBasePath=/claude'" /dev/null
+
 
   # ------------------------------------------------------------------
   # STAGE 3: Register API Products, Developer App, & API Key
