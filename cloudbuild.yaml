@@ -48,7 +48,7 @@ steps:
           -var="project_id=${PROJECT_ID}" \
           -var="region=us-central1"
 
-   # ------------------------------------------------------------------
+  # ------------------------------------------------------------------
   # STAGE 2: Deploy Gemini & Claude AI Proxies via Apigee Templater
   # ------------------------------------------------------------------
   - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli:latest'
@@ -61,23 +61,24 @@ steps:
         apt-get update && apt-get install -y nodejs npm
         npm install -g apigee-templater
         
-        # Define the Service Account that Apigee will use to call Vertex AI.
-        # Ensure this SA exists in your project and has the 'roles/aiplatform.user' role.
-        export APIGEE_SA="apigee-runtime@bond-ai-gateway-demo.iam.gserviceaccount.com"
+        # Define the Runtime Service Account
+        export APIGEE_SA="apigee-runtime@${PROJECT_ID}.iam.gserviceaccount.com"
         
         echo "Deploying Gemini AI Proxy..."
+        # Note the double dollar sign on $${APIGEE_SA} to escape Cloud Build substitution
         script -q -e -c "aft -i ./templates/AI-Proxy-Gemini.yaml \
           -o '${PROJECT_ID}:AI-Gemini:dev' \
-          -s '${APIGEE_SA}' \
+          -s '$${APIGEE_SA}' \
           -t '$(gcloud auth print-access-token)' \
           -p 'ModelBasePath=/gemini'" /dev/null
           
         echo "Deploying Claude AI Proxy..."
         script -q -e -c "aft -i ./templates/AI-Proxy-Claude.yaml \
           -o '${PROJECT_ID}:AI-Claude:dev' \
-          -s '${APIGEE_SA}' \
+          -s '$${APIGEE_SA}' \
           -t '$(gcloud auth print-access-token)' \
           -p 'ModelBasePath=/claude'" /dev/null
+
 
 
   # ------------------------------------------------------------------
