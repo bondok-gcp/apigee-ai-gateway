@@ -54,8 +54,6 @@ steps:
   - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli:latest'
     id: 'deploy-ai-proxies'
     entrypoint: 'bash'
-    env:
-      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
     args:
       - '-c'
       - |
@@ -63,18 +61,16 @@ steps:
         apt-get update && apt-get install -y nodejs npm
         npm install -g apigee-templater
         
-        TOKEN=$(gcloud auth print-access-token)
-        
         echo "Deploying Gemini AI Proxy..."
         aft -i ./templates/AI-Proxy-Gemini.yaml \
           -o "${PROJECT_ID}:AI-Gemini:dev" \
-          -t "${TOKEN}" \
+          -t "$(gcloud auth print-access-token)" \
           -p "ModelBasePath=/gemini"
           
         echo "Deploying Claude AI Proxy..."
         aft -i ./templates/AI-Proxy-Claude.yaml \
           -o "${PROJECT_ID}:AI-Claude:dev" \
-          -t "${TOKEN}" \
+          -t "$(gcloud auth print-access-token)" \
           -p "ModelBasePath=/claude"
 
   # ------------------------------------------------------------------
