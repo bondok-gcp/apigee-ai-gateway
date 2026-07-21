@@ -5,10 +5,25 @@ ORG="${GOOGLE_CLOUD_PROJECT}"
 ENV="${APIGEE_ENVIRONMENT:-dev}"
 DEV_EMAIL="ai-developer@example.com"
 APP_NAME="ai-gateway-app"
+PRODUCT_NAME="ai-gateway-product"
 
 TOKEN=$(gcloud auth print-access-token)
 
-echo "1. Registering Developer (${DEV_EMAIL})..."
+echo "1. Creating API Product (${PRODUCT_NAME})..."
+# This explicitly creates a product allowing access to the new proxies and all sub-paths (/**)
+curl -s -X POST "https://apigee.googleapis.com/v1/organizations/${ORG}/apiproducts" \
+  -H "Authorization: Bearer ${TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"name\": \"${PRODUCT_NAME}\",
+    \"displayName\": \"AI Gateway Product\",
+    \"approvalType\": \"auto\",
+    \"environments\": [\"${ENV}\"],
+    \"proxies\": [\"AI-Gemini\", \"AI-Claude\"],
+    \"apiResources\": [\"/\", \"/**\"]
+  }" > /dev/null || true
+
+echo "2. Registering Developer (${DEV_EMAIL})..."
 curl -s -X POST "https://apigee.googleapis.com/v1/organizations/${ORG}/developers" \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
@@ -19,17 +34,13 @@ curl -s -X POST "https://apigee.googleapis.com/v1/organizations/${ORG}/developer
     \"userName\": \"aideveloper\"
   }" > /dev/null || true
 
-echo "2. Fetching deployed API Products..."
-PRODUCTS_JSON=$(curl -s -H "Authorization: Bearer ${TOKEN}" "https://apigee.googleapis.com/v1/organizations/${ORG}/apiproducts" | jq -r '.apiProduct[].name')
-PROD_ARRAY=$(echo "$PRODUCTS_JSON" | jq -R . | jq -s .)
-
 echo "3. Registering Developer App (${APP_NAME})..."
 curl -s -X POST "https://apigee.googleapis.com/v1/organizations/${ORG}/developers/${DEV_EMAIL}/apps" \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
   -d "{
     \"name\": \"${APP_NAME}\",
-    \"apiProducts\": ${PROD_ARRAY}
+    \"apiProducts\": [\"${PRODUCT_NAME}\"]
   }" > /dev/null || true
 
 echo "4. Retrieving API Key..."
